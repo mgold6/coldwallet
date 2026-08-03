@@ -1,28 +1,37 @@
+import Card from "@/components/ui/Card";
+import SectionTitle from "@/components/ui/SectionTitle";
+import {
+  FaShieldAlt,
+  FaChartPie,
+  FaGraduationCap,
+  FaBalanceScale,
+} from "react-icons/fa";
+
 export default function WhyColdWallet() {
-  const cards = [
+  const features = [
     {
+      icon: <FaShieldAlt className="text-5xl text-blue-500" />,
       title: "Enterprise Security",
       description:
-        "Industry best practices to help protect digital assets and sensitive wallet information.",
-      icon: "🔐",
+        "Learn best practices for protecting your cryptocurrency and digital assets with security-first guidance.",
     },
     {
+      icon: <FaChartPie className="text-5xl text-blue-500" />,
       title: "Portfolio Organization",
       description:
-        "Keep your cryptocurrency investments organized in one secure place.",
-      icon: "📊",
+        "Keep your wallets, assets, and investments organized with an intuitive platform.",
     },
     {
+      icon: <FaGraduationCap className="text-5xl text-blue-500" />,
       title: "Learning Center",
       description:
-        "Master blockchain, cold wallets, private keys, and cryptocurrency security.",
-      icon: "📚",
+        "Master blockchain technology, cold wallets, private keys, and crypto security through guided learning.",
     },
     {
+      icon: <FaBalanceScale className="text-5xl text-blue-500" />,
       title: "Compliance Resources",
       description:
-        "Access educational resources and compliance guidance for digital assets.",
-      icon: "⚖️",
+        "Access educational resources and compliance information to stay informed as regulations evolve.",
     },
   ];
 
@@ -30,48 +39,28 @@ export default function WhyColdWallet() {
     <section className="bg-[#05070D] py-28">
       <div className="mx-auto max-w-7xl px-8">
 
-        <div className="mb-16 text-center">
-
-          <span className="rounded-full bg-blue-500/10 px-4 py-2 text-blue-400">
-            WHY CHOOSE COLDWALLET
-          </span>
-
-          <h2 className="mt-6 text-5xl font-bold text-white">
-            Built Around Security & Education
-          </h2>
-
-          <p className="mx-auto mt-6 max-w-3xl text-lg text-gray-400">
-            ColdWallet helps users learn, organize, and protect digital assets
-            through education, portfolio management, and security-first design.
-          </p>
-
-        </div>
+        <SectionTitle
+          badge="WHY COLDWALLET"
+          title="Built Around Security & Education"
+          description="ColdWallet combines education, organization, and security tools into one modern platform designed to help users confidently manage their digital assets."
+        />
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-
-          {cards.map((card) => (
-
-            <div
-              key={card.title}
-              className="rounded-3xl border border-gray-800 bg-[#10141F] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-500"
-            >
-
-              <div className="mb-6 text-5xl">
-                {card.icon}
+          {features.map((feature) => (
+            <Card key={feature.title}>
+              <div className="mb-6">
+                {feature.icon}
               </div>
 
               <h3 className="mb-4 text-2xl font-bold text-white">
-                {card.title}
+                {feature.title}
               </h3>
 
-              <p className="text-gray-400">
-                {card.description}
+              <p className="leading-7 text-gray-400">
+                {feature.description}
               </p>
-
-            </div>
-
+            </Card>
           ))}
-
         </div>
 
       </div>
