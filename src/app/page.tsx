@@ -6,12 +6,12 @@ import WhyColdWallet from "@/components/home/WhyColdWallet";
 import HowItWorks from "@/components/home/HowItWorks";
 import SecurityFirst from "@/components/home/SecurityFirst";
 import DashboardPreview from "@/components/home/DashboardPreview";
+import Testimonials from "@/components/home/Testimonials";
 import Footer from "@/components/home/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-black min-h-screen text-white">
-
+    <main className="min-h-screen bg-black text-white">
       <Navbar />
 
       <CryptoTicker />
@@ -28,8 +28,9 @@ export default function Home() {
 
       <DashboardPreview />
 
-      <Footer />
+      <Testimonials />
 
+      <Footer />
     </main>
   );
 }
