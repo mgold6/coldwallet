@@ -17,14 +17,15 @@ const prisma = new PrismaClient();
 const ADMIN_EMAIL =
   process.env.SEED_ADMIN_EMAIL ?? "admin@coldwallet.io";
 
-const ADMIN_PASSWORD =
-  process.env.SEED_ADMIN_PASSWORD;
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
 
 if (!ADMIN_PASSWORD) {
   throw new Error(
     "Missing SEED_ADMIN_PASSWORD environment variable."
   );
 }
+
+const adminPassword: string = ADMIN_PASSWORD;
 
 /*
 |--------------------------------------------------------------------------
@@ -327,7 +328,7 @@ async function getCurrencyId(code: string): Promise<string> {
 */
 
 async function createAdmin(): Promise<void> {
-  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   await prisma.user.upsert({
     where: {

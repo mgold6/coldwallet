@@ -56,10 +56,14 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const validPassword = await verifyPassword(
-          credentials.password,
-          user.password
-        );
+        if (!user.password) {
+  throw new Error("This account does not have a password.");
+}
+
+const validPassword = await verifyPassword(
+  credentials.password,
+  user.password
+);
 
         if (!validPassword) {
           return null;
