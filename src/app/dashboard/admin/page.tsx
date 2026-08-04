@@ -2,6 +2,8 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import StatsCards from "./components/StatsCards";
 import UsersTable from "./components/UsersTable";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminDashboardPage() {
   return (
     <DashboardLayout>

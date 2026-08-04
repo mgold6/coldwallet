@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Dialog,
@@ -23,6 +23,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type Portfolio = {
+  id: string;
+  name: string;
+};
+
+type Network = {
+  id: string;
+  name: string;
+};
+
+type Currency = {
+  id: string;
+  name: string;
+  networks: Network[];
+};
+
 type AssignWalletDialogProps = {
   userId: string;
   userName: string;
@@ -33,15 +49,56 @@ export default function AssignWalletDialog({
   userName,
 }: AssignWalletDialogProps) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+
+  const [portfolioId, setPortfolioId] = useState("");
+  const [currencyId, setCurrencyId] = useState("");
+  const [networkId, setNetworkId] = useState("");
+
+  const [address, setAddress] = useState("");
+  const [label, setLabel] = useState("");
+
+  const selectedCurrency = useMemo(
+    () => currencies.find((c) => c.id === currencyId),
+    [currencies, currencyId]
+  );
+
+  const networks = selectedCurrency?.networks ?? [];
+
+  useEffect(() => {
+    if (!open) return;
+
+    async function loadData() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/admin/wallets/assignment-data?userId=${userId}`
+        );
+
+        const json = await response.json();
+
+        if (!json.success) return;
+
+        setPortfolios(json.data.portfolios);
+        setCurrencies(json.data.currencies);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [open, userId]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={
-          <Button size="sm">
-            Assign Wallet
-          </Button>
-        }
+        render={<Button size="sm">Assign Wallet</Button>}
       />
 
       <DialogContent className="sm:max-w-xl">
@@ -49,7 +106,8 @@ export default function AssignWalletDialog({
           <DialogTitle>Assign Wallet</DialogTitle>
 
           <DialogDescription>
-            Assign a cryptocurrency wallet to <strong>{userName}</strong>.
+            Assign a cryptocurrency wallet to{" "}
+            <strong>{userName}</strong>.
           </DialogDescription>
         </DialogHeader>
 
@@ -57,15 +115,23 @@ export default function AssignWalletDialog({
           <div className="space-y-2">
             <Label>Portfolio</Label>
 
-            <Select>
+            <Select
+              value={portfolioId}
+              onValueChange={(value) => setPortfolioId(value ?? "")}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select portfolio" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="default">
-                  Default Portfolio
-                </SelectItem>
+                {portfolios.map((portfolio) => (
+                  <SelectItem
+                    key={portfolio.id}
+                    value={portfolio.id}
+                  >
+                    {portfolio.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -73,22 +139,26 @@ export default function AssignWalletDialog({
           <div className="space-y-2">
             <Label>Currency</Label>
 
-            <Select>
+            <Select
+              value={currencyId}
+              onValueChange={(value) => {
+                setCurrencyId(value ?? "");
+                setNetworkId("");
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="BTC">Bitcoin</SelectItem>
-                <SelectItem value="ETH">Ethereum</SelectItem>
-                <SelectItem value="USDT">USDT</SelectItem>
-                <SelectItem value="SOL">Solana</SelectItem>
-                <SelectItem value="XRP">XRP</SelectItem>
-                <SelectItem value="ADA">Cardano</SelectItem>
-                <SelectItem value="BNB">BNB</SelectItem>
-                <SelectItem value="AVAX">Avalanche</SelectItem>
-                <SelectItem value="DOGE">Dogecoin</SelectItem>
-                <SelectItem value="LTC">Litecoin</SelectItem>
+                {currencies.map((currency) => (
+                  <SelectItem
+                    key={currency.id}
+                    value={currency.id}
+                  >
+                    {currency.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -96,18 +166,23 @@ export default function AssignWalletDialog({
           <div className="space-y-2">
             <Label>Network</Label>
 
-            <Select>
+            <Select
+              value={networkId}
+              onValueChange={(value) => setNetworkId(value ?? "")}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select network" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="BTC">Bitcoin</SelectItem>
-                <SelectItem value="ERC20">ERC20</SelectItem>
-                <SelectItem value="TRC20">TRC20</SelectItem>
-                <SelectItem value="BEP20">BEP20</SelectItem>
-                <SelectItem value="SOL">Solana</SelectItem>
-                <SelectItem value="AVAX">Avalanche</SelectItem>
+                {networks.map((network) => (
+                  <SelectItem
+                    key={network.id}
+                    value={network.id}
+                  >
+                    {network.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -115,18 +190,26 @@ export default function AssignWalletDialog({
           <div className="space-y-2">
             <Label>Wallet Address</Label>
 
-            <Input placeholder="Enter wallet address" />
+            <Input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter wallet address"
+            />
           </div>
 
           <div className="space-y-2">
             <Label>Wallet Label</Label>
 
-            <Input placeholder="Primary BTC Wallet" />
+            <Input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="Primary BTC Wallet"
+            />
           </div>
 
           <div className="flex justify-end">
-            <Button>
-              Assign Wallet
+            <Button disabled={loading}>
+              {loading ? "Loading..." : "Assign Wallet"}
             </Button>
           </div>
         </div>

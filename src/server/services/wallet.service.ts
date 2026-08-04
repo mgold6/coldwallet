@@ -79,31 +79,37 @@ export class WalletService {
     }
 
     const wallet = await walletRepository.create({
-      address,
-      label,
+  address: address.trim(),
+  label: label?.trim(),
 
-      portfolio: {
-        connect: {
-          id: portfolioId,
-        },
-      },
+  balance: 0,
 
-      currency: {
-        connect: {
-          id: currencyId,
-        },
-      },
+  status: "ACTIVE",
 
-      ...(networkId && {
+  portfolio: {
+    connect: {
+      id: portfolioId,
+    },
+  },
+
+  currency: {
+    connect: {
+      id: currencyId,
+    },
+  },
+
+  ...(networkId
+    ? {
         network: {
           connect: {
             id: networkId,
           },
         },
-      }),
-    });
+      }
+    : {}),
+});
 
-    return wallet;
+return wallet;
   }
 }
 
