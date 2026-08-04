@@ -1,3 +1,8 @@
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "@/lib/auth";
+
 import StatCard from "@/components/dashboard/StatCard";
 import PortfolioChart from "@/components/dashboard/PortfolioChart";
 import Watchlist from "@/components/dashboard/Watchlist";
@@ -5,7 +10,13 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 import SecurityScore from "@/components/dashboard/SecurityScore";
 import QuickActions from "@/components/dashboard/QuickActions";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
+
   return (
     <>
       {/* Welcome */}
@@ -25,7 +36,6 @@ export default function DashboardPage() {
       {/* Statistics */}
 
       <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
         <StatCard
           title="Portfolio Value"
           value="$42,567.91"
@@ -49,37 +59,30 @@ export default function DashboardPage() {
           value="98%"
           change="Excellent"
         />
-
       </section>
 
       {/* Portfolio */}
 
       <section className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-3">
-
         <div className="xl:col-span-2">
           <PortfolioChart />
         </div>
 
         <Watchlist />
-
       </section>
 
       {/* Bottom */}
 
       <section className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-2">
-
         <RecentActivity />
 
         <SecurityScore />
-
       </section>
 
       {/* Quick Actions */}
 
       <section className="mt-10">
-
         <QuickActions />
-
       </section>
     </>
   );
