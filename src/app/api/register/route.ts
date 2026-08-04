@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       confirmPassword,
     } = body;
 
-    // Validation
+    // Basic validation
     if (
       !firstName ||
       !lastName ||
@@ -23,63 +23,85 @@ export async function POST(req: Request) {
       !confirmPassword
     ) {
       return NextResponse.json(
-        { error: "All fields are required." },
+        {
+          success: false,
+          message: "All fields are required.",
+        },
         { status: 400 }
       );
     }
 
     if (password !== confirmPassword) {
       return NextResponse.json(
-        { error: "Passwords do not match." },
+        {
+          success: false,
+          message: "Passwords do not match.",
+        },
         { status: 400 }
       );
     }
 
+    if (password.length < 8) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Password must be at least 8 characters.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
     const existingUser = await prisma.user.findUnique({
       where: {
-        email,
+        email: normalizedEmail,
       },
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email already exists." },
+        {
+          success: false,
+          message: "An account with this email already exists.",
+        },
         { status: 409 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
-        name: `${firstName} ${lastName}`,
-        email,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: normalizedEmail,
         password: hashedPassword,
-        role: "user",
       },
     });
 
     return NextResponse.json(
       {
         success: true,
+        message: "Registration successful.",
         user: {
           id: user.id,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           email: user.email,
         },
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error(error);
+    console.error("Registration Error:", error);
 
     return NextResponse.json(
       {
-        error: "Something went wrong.",
+        success: false,
+        message: "Something went wrong.",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
