@@ -43,6 +43,26 @@ export class UserRepository {
       },
     });
   }
+
+  async findAllWithPortfolios() {
+    return prisma.user.findMany({
+      include: {
+        portfolios: {
+          include: {
+            wallets: {
+              include: {
+                currency: true,
+                network: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 }
 
 export const userRepository = new UserRepository();
