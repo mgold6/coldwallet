@@ -1,7 +1,10 @@
 import { UserRole } from "@prisma/client";
 
+import prisma from "@/lib/prisma";
+
 import { walletRepository } from "../repositories/wallet.repository";
 import { portfolioRepository } from "../repositories/portfolio.repository";
+
 import { ValidationError } from "../errors/ValidationError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
@@ -10,8 +13,8 @@ export class WalletService {
   async assignWallet({
     currentUserRole,
     portfolioId,
-    currency,
-    network,
+    currencyId,
+    networkId,
     address,
     label,
   }: {
@@ -19,9 +22,9 @@ export class WalletService {
 
     portfolioId: string;
 
-    currency: string;
+    currencyId: string;
 
-    network?: string;
+    networkId?: string;
 
     address: string;
 
@@ -41,6 +44,31 @@ export class WalletService {
       throw new NotFoundError("Portfolio not found.");
     }
 
+    const currency = await prisma.currency.findUnique({
+      where: {
+        id: currencyId,
+      },
+    });
+
+    if (!currency) {
+      throw new NotFoundError("Currency not found.");
+    }
+
+    if (networkId) {
+      const network = await prisma.network.findFirst({
+        where: {
+          id: networkId,
+          currencyId,
+        },
+      });
+
+      if (!network) {
+        throw new ValidationError(
+          "Selected network does not belong to the selected currency."
+        );
+      }
+    }
+
     const existingWallet =
       await walletRepository.findByAddress(address);
 
@@ -50,22 +78,32 @@ export class WalletService {
       );
     }
 
-    // We will connect Currency and Network
-    // in the next milestone.
-
-    return {
-      success: true,
-
-      portfolio,
-
-      currency,
-
-      network,
-
+    const wallet = await walletRepository.create({
       address,
-
       label,
-    };
+
+      portfolio: {
+        connect: {
+          id: portfolioId,
+        },
+      },
+
+      currency: {
+        connect: {
+          id: currencyId,
+        },
+      },
+
+      ...(networkId && {
+        network: {
+          connect: {
+            id: networkId,
+          },
+        },
+      }),
+    });
+
+    return wallet;
   }
 }
 

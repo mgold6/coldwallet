@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import AssignWalletDialog from "./AssignWalletDialog";
 
 export default async function UsersTable() {
   const users = await dashboardService.getUsers();
@@ -45,18 +45,18 @@ export default async function UsersTable() {
         <TableBody>
           {users.map((user) => {
             const walletCount = user.portfolios.reduce(
-              (count, portfolio) =>
-                count + portfolio.wallets.length,
+              (count, portfolio) => count + portfolio.wallets.length,
               0
             );
 
+            const userName =
+              user.firstName || user.lastName
+                ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+                : user.email;
+
             return (
               <TableRow key={user.id}>
-                <TableCell>
-                  {user.firstName || user.lastName
-                    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-                    : "—"}
-                </TableCell>
+                <TableCell>{userName}</TableCell>
 
                 <TableCell>{user.email}</TableCell>
 
@@ -77,9 +77,10 @@ export default async function UsersTable() {
                 </TableCell>
 
                 <TableCell className="text-right">
-                  <Button size="sm">
-                    Assign Wallet
-                  </Button>
+                  <AssignWalletDialog
+                    userId={user.id}
+                    userName={userName}
+                  />
                 </TableCell>
               </TableRow>
             );
