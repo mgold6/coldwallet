@@ -14,6 +14,33 @@ model User {
   password  String
   role      String   @default("user")
 
+  portfolios Portfolio[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets     Asset[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Asset {
+  id          String   @id @default(cuid())
+  symbol      String
+  name        String
+  quantity    Float
+  averageCost Float
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
