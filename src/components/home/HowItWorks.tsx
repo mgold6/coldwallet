@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/card";
 import SectionTitle from "@/components/ui/SectionTitle";
 
 export default function HowItWorks() {

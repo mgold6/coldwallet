@@ -1,5 +1,5 @@
 import { FaBitcoin, FaEthereum } from "react-icons/fa";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export default function Hero() {
   return (
