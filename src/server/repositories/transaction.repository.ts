@@ -5,8 +5,19 @@ import {
   TransactionStatus,
 } from "@prisma/client";
 
+type TransactionWithRelations =
+  Prisma.TransactionGetPayload<{
+    include: {
+      wallet: true;
+      currency: true;
+      network: true;
+    };
+  }>;
+
 export class TransactionRepository {
-  async findById(id: string): Promise<Transaction | null> {
+  async findById(
+    id: string
+  ): Promise<TransactionWithRelations | null> {
     return prisma.transaction.findUnique({
       where: { id },
       include: {
@@ -17,16 +28,25 @@ export class TransactionRepository {
     });
   }
 
-  async findByHash(txHash: string): Promise<Transaction | null> {
+  async findByHash(
+    txHash: string
+  ): Promise<Transaction | null> {
     return prisma.transaction.findFirst({
-      where: { txHash },
+      where: {
+        txHash,
+      },
     });
   }
 
-  async findByWallet(walletId: string): Promise<Transaction[]> {
+  async findByWallet(
+    walletId: string
+  ): Promise<TransactionWithRelations[]> {
     return prisma.transaction.findMany({
-      where: { walletId },
+      where: {
+        walletId,
+      },
       include: {
+        wallet: true,
         currency: true,
         network: true,
       },
@@ -36,7 +56,7 @@ export class TransactionRepository {
     });
   }
 
-  async findPending(): Promise<Transaction[]> {
+  async findPending(): Promise<TransactionWithRelations[]> {
     return prisma.transaction.findMany({
       where: {
         status: TransactionStatus.PENDING,
@@ -65,12 +85,14 @@ export class TransactionRepository {
     data: Prisma.TransactionUpdateInput
   ): Promise<Transaction> {
     return prisma.transaction.update({
-      where: { id },
+      where: {
+        id,
+      },
       data,
     });
   }
 
-  async list(): Promise<Transaction[]> {
+  async list(): Promise<TransactionWithRelations[]> {
     return prisma.transaction.findMany({
       include: {
         wallet: true,
