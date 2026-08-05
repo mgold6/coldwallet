@@ -38,6 +38,38 @@ export class AnalyticsService {
       };
     });
   }
+
+  async getAssetAllocation(userId: string) {
+    const wallets = await prisma.wallet.findMany({
+      where: {
+        portfolio: {
+          userId,
+        },
+      },
+      include: {
+        currency: true,
+      },
+    });
+
+    const allocation = new Map<string, number>();
+
+    for (const wallet of wallets) {
+      const code = wallet.currency.code;
+      const balance = Number(wallet.balance);
+
+      allocation.set(
+        code,
+        (allocation.get(code) ?? 0) + balance
+      );
+    }
+
+    return Array.from(allocation.entries()).map(
+      ([name, value]) => ({
+        name,
+        value,
+      })
+    );
+  }
 }
 
 export const analyticsService = new AnalyticsService();
