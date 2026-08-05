@@ -41,6 +41,23 @@ export class AdminWalletService {
       currencies,
     };
   }
+
+  async getWallets() {
+    return prisma.wallet.findMany({
+      include: {
+        portfolio: {
+          include: {
+            user: true,
+          },
+        },
+        currency: true,
+        network: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 }
 
 export const adminWalletService = new AdminWalletService();

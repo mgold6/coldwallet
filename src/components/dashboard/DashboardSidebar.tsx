@@ -15,42 +15,42 @@ export default function DashboardSidebar() {
 
       <nav className="space-y-2 p-4">
         <Link
-          href="/dashboard/admin"
+          href="/admin"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >
           Dashboard
         </Link>
 
         <Link
-          href="#"
+          href="/admin/users"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >
           Users
         </Link>
 
         <Link
-          href="#"
+          href="/admin/wallets"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >
           Wallets
         </Link>
 
         <Link
-          href="#"
+          href="/admin/transactions"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >
           Transactions
         </Link>
 
         <Link
-          href="#"
+          href="/admin/support"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >
           Support
         </Link>
 
         <Link
-          href="#"
+          href="/admin/settings"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >
           Settings
