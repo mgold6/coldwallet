@@ -8,6 +8,8 @@ import WalletBusinessInfo from "./components/WalletBusinessInfo";
 import WalletDeposits from "./components/WalletDeposits";
 import WalletWithdrawals from "./components/WalletWithdrawals";
 import WalletTransactions from "./components/WalletTransactions";
+import WalletFinancialOperations from "./components/WalletFinancialOperations";
+import WalletTabs from "./components/WalletTabs";
 
 interface WalletPageProps {
   params: Promise<{
@@ -22,8 +24,7 @@ export default async function WalletDetailsPage({
 }: WalletPageProps) {
   const { id } = await params;
 
-  const wallet =
-    await adminWalletService.getWalletById(id);
+  const wallet = await adminWalletService.getWalletById(id);
 
   if (!wallet) {
     notFound();
@@ -31,28 +32,41 @@ export default async function WalletDetailsPage({
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white">
           Wallet Details
         </h1>
 
         <p className="mt-2 text-slate-400">
-          Complete wallet overview and activity.
+          Complete wallet overview and financial management.
         </p>
       </div>
 
+      {/* Top Cards */}
       <div className="grid gap-6 lg:grid-cols-2">
         <WalletSummary wallet={wallet} />
         <WalletOwner wallet={wallet} />
       </div>
 
-      <WalletBusinessInfo wallet={wallet} />
+      {/* Financial Operations */}
+      <WalletFinancialOperations walletId={wallet.id} />
 
-      <WalletDeposits wallet={wallet} />
-
-      <WalletWithdrawals wallet={wallet} />
-
-      <WalletTransactions wallet={wallet} />
+      {/* Tabbed Content */}
+      <WalletTabs
+        overview={
+          <WalletBusinessInfo wallet={wallet} />
+        }
+        deposits={
+          <WalletDeposits wallet={wallet} />
+        }
+        withdrawals={
+          <WalletWithdrawals wallet={wallet} />
+        }
+        transactions={
+          <WalletTransactions wallet={wallet} />
+        }
+      />
     </div>
   );
 }
