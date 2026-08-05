@@ -36,6 +36,13 @@ export default function DashboardSidebar() {
         </Link>
 
         <Link
+          href="/admin/deposits"
+          className="block rounded-lg px-4 py-3 hover:bg-slate-800"
+        >
+          Deposits
+        </Link>
+
+        <Link
           href="/admin/transactions"
           className="block rounded-lg px-4 py-3 hover:bg-slate-800"
         >

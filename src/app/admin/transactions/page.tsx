@@ -3,8 +3,8 @@ import { transactionService } from "@/server/services/transaction.service";
 export const dynamic = "force-dynamic";
 
 export default async function TransactionsPage() {
-  const transactions =
-    await transactionService.getAllTransactions();
+  const transactions = await transactionService.getAllTransactions();
+  const stats = await transactionService.getStats();
 
   return (
     <div className="space-y-8">
@@ -16,6 +16,68 @@ export default async function TransactionsPage() {
         <p className="mt-2 text-slate-400">
           View and manage all cryptocurrency transactions.
         </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Total
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold">
+            {stats.total}
+          </h2>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Pending
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-yellow-400">
+            {stats.pending}
+          </h2>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Processing
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-blue-400">
+            {stats.processing}
+          </h2>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Completed
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-green-400">
+            {stats.completed}
+          </h2>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Failed
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-red-400">
+            {stats.failed}
+          </h2>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Cancelled
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-gray-400">
+            {stats.cancelled}
+          </h2>
+        </div>
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-900">
