@@ -161,6 +161,8 @@ const [submitting, setSubmitting] = useState(false);
 
       setPortfolios(json.data.portfolios);
       setCurrencies(json.data.currencies);
+      console.log("Portfolios:", json.data.portfolios);
+console.log("Currencies:", json.data.currencies);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load assignment data.");
@@ -230,6 +232,7 @@ async function handleSubmit() {
     setSubmitting(false);
   }
 }
+console.log("Current portfolios:", portfolios);
 
   return (
 
