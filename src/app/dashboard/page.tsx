@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
+import { dashboardService } from "@/server/services/dashboard.service";
 
 import StatCard from "@/components/dashboard/StatCard";
 import PortfolioChart from "@/components/dashboard/PortfolioChart";
@@ -16,6 +17,10 @@ export default async function DashboardPage() {
   if (!session) {
     redirect("/login");
   }
+
+  const stats = await dashboardService.getDashboardStats(
+    (session.user as any).id
+  );
 
   return (
     <>
@@ -38,25 +43,25 @@ export default async function DashboardPage() {
       <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Portfolio Value"
-          value="$42,567.91"
-          change="+4.82%"
+          value={`$${stats.portfolioValue}`}
+          change={`${stats.depositCount} Deposits`}
         />
 
         <StatCard
           title="Today's Profit"
-          value="+$1,254.32"
-          change="+2.14%"
+          value={`$${stats.todaysProfit}`}
+          change={`${stats.withdrawalCount} Withdrawals`}
         />
 
         <StatCard
           title="Active Wallets"
-          value="3"
-          change="Secured"
+          value={stats.activeWallets.toString()}
+          change="Active"
         />
 
         <StatCard
           title="Security Score"
-          value="98%"
+          value={`${stats.securityScore}%`}
           change="Excellent"
         />
       </section>
