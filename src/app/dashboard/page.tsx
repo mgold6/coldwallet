@@ -7,7 +7,7 @@ import { analyticsService } from "@/server/services/analytics.service";
 
 import StatCard from "@/components/dashboard/StatCard";
 import PortfolioChart from "@/components/dashboard/PortfolioChart";
-import Watchlist from "@/components/dashboard/Watchlist";
+import PortfolioAllocation from "@/components/dashboard/PortfolioAllocation";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import SecurityScore from "@/components/dashboard/SecurityScore";
 import QuickActions from "@/components/dashboard/QuickActions";
@@ -21,13 +21,16 @@ export default async function DashboardPage() {
 
   const userId = (session.user as any).id;
 
-  const [stats, history] = await Promise.all([
+  const [stats, history, allocation] = await Promise.all([
     dashboardService.getDashboardStats(userId),
     analyticsService.getPortfolioHistory(userId),
+    analyticsService.getAssetAllocation(userId),
   ]);
 
   return (
     <>
+      {/* Welcome */}
+
       <section>
         <h1 className="text-4xl font-bold text-white">
           Welcome to ColdWallet
@@ -39,6 +42,8 @@ export default async function DashboardPage() {
           professional platform.
         </p>
       </section>
+
+      {/* Statistics */}
 
       <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -66,18 +71,25 @@ export default async function DashboardPage() {
         />
       </section>
 
+      {/* Portfolio Analytics */}
+
       <section className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <PortfolioChart data={history} />
         </div>
 
-        <Watchlist />
+        <PortfolioAllocation data={allocation} />
       </section>
+
+      {/* Bottom Section */}
 
       <section className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <RecentActivity />
+
         <SecurityScore />
       </section>
+
+      {/* Quick Actions */}
 
       <section className="mt-10">
         <QuickActions />
