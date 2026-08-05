@@ -43,6 +43,7 @@ export class WithdrawalService {
         throw new Error("Insufficient wallet balance.");
       }
 
+      // Decrease wallet balance
       await tx.wallet.update({
         where: {
           id: withdrawal.walletId,
@@ -54,6 +55,7 @@ export class WithdrawalService {
         },
       });
 
+      // Mark withdrawal as processed and record business dates
       await tx.withdrawal.update({
         where: {
           id,
@@ -61,15 +63,24 @@ export class WithdrawalService {
         data: {
           approved: true,
           processed: true,
+
+          requestedAt: withdrawal.requestedAt ?? new Date(),
+          approvedAt: new Date(),
+          processedAt: new Date(),
+          completedAt: new Date(),
         },
       });
 
+      // Update the linked transaction
       await tx.transaction.update({
         where: {
           id: withdrawal.transactionId,
         },
         data: {
           status: "COMPLETED",
+          transactionDate:
+            withdrawal.transaction.transactionDate ?? new Date(),
+          confirmedAt: new Date(),
         },
       });
 
