@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UserRole } from "@prisma/client";
 
-import { assignWalletSchema } from "@/lib/validators/wallet";
+import {
+  assignWalletSchema,
+  updateWalletSchema,
+} from "@/lib/validators/wallet";
+
 import { walletService } from "@/server/services/wallet.service";
 
 export async function POST(request: NextRequest) {
@@ -16,7 +20,9 @@ export async function POST(request: NextRequest) {
           success: false,
           errors: result.error.flatten(),
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
@@ -32,6 +38,58 @@ export async function POST(request: NextRequest) {
       address: result.data.address,
 
       label: result.data.label,
+    });
+
+    return NextResponse.json({
+      success: true,
+      wallet,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Internal server error.",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    const result = updateWalletSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          errors: result.error.flatten(),
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const wallet = await walletService.updateWallet({
+      id: result.data.id,
+
+      currentUserRole: UserRole.ADMIN,
+
+      label: result.data.label,
+
+      status: result.data.status,
+
+      assignedAt: result.data.assignedAt,
+
+      notes: result.data.notes,
     });
 
     return NextResponse.json({

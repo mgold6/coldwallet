@@ -79,37 +79,73 @@ export class WalletService {
     }
 
     const wallet = await walletRepository.create({
-  address: address.trim(),
-  label: label?.trim(),
+      address: address.trim(),
+      label: label?.trim(),
 
-  balance: 0,
+      balance: 0,
 
-  status: "ACTIVE",
+      status: "ACTIVE",
 
-  portfolio: {
-    connect: {
-      id: portfolioId,
-    },
-  },
-
-  currency: {
-    connect: {
-      id: currencyId,
-    },
-  },
-
-  ...(networkId
-    ? {
-        network: {
-          connect: {
-            id: networkId,
-          },
+      portfolio: {
+        connect: {
+          id: portfolioId,
         },
-      }
-    : {}),
-});
+      },
 
-return wallet;
+      currency: {
+        connect: {
+          id: currencyId,
+        },
+      },
+
+      ...(networkId
+        ? {
+            network: {
+              connect: {
+                id: networkId,
+              },
+            },
+          }
+        : {}),
+    });
+
+    return wallet;
+  }
+
+  async updateWallet({
+    id,
+    currentUserRole,
+    label,
+    status,
+    assignedAt,
+    notes,
+  }: {
+    id: string;
+    currentUserRole: UserRole;
+    label?: string;
+    status?: "ACTIVE" | "DISABLED";
+    assignedAt?: Date | null;
+    notes?: string | null;
+  }) {
+    // Only administrators may update wallets.
+    if (currentUserRole !== UserRole.ADMIN) {
+      throw new UnauthorizedError(
+        "Only administrators may update wallets."
+      );
+    }
+
+    const wallet = await walletRepository.findById(id);
+
+    if (!wallet) {
+      throw new NotFoundError("Wallet not found.");
+    }
+
+    return walletRepository.update(id, {
+      label: label?.trim(),
+      status,
+      assignedAt,
+      notes: notes?.trim(),
+    });
   }
 }
 
