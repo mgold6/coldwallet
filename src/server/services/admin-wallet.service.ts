@@ -58,6 +58,54 @@ export class AdminWalletService {
       },
     });
   }
+
+  async getWalletById(id: string) {
+    return prisma.wallet.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        portfolio: {
+          include: {
+            user: true,
+          },
+        },
+        currency: true,
+        network: true,
+
+        deposits: {
+          include: {
+            currency: true,
+            network: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+
+        withdrawals: {
+          include: {
+            currency: true,
+            network: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+
+        transactions: {
+          include: {
+            currency: true,
+            network: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+  }
 }
 
-export const adminWalletService = new AdminWalletService();
+export const adminWalletService =
+  new AdminWalletService();
