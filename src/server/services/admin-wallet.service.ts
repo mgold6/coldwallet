@@ -70,37 +70,30 @@ export class AdminWalletService {
             user: true,
           },
         },
+
         currency: true,
+
         network: true,
 
         deposits: {
-          include: {
-            currency: true,
-            network: true,
-          },
           orderBy: {
             createdAt: "desc",
           },
+          take: 10,
         },
 
         withdrawals: {
-          include: {
-            currency: true,
-            network: true,
-          },
           orderBy: {
             createdAt: "desc",
           },
+          take: 10,
         },
 
         transactions: {
-          include: {
-            currency: true,
-            network: true,
-          },
           orderBy: {
             createdAt: "desc",
           },
+          take: 10,
         },
       },
     });
