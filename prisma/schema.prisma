@@ -132,26 +132,41 @@ model Portfolio {
 }
 
 model Wallet {
-  id           String        @id @default(cuid())
+  id           String       @id @default(cuid())
   portfolioId  String
   currencyId   String
   networkId    String?
-  address      String        @unique
+  address      String       @unique
   label        String?
-  balance      Decimal       @default(0.0)
-  status       WalletStatus  @default(ACTIVE)
+  balance      Decimal      @default(0.0)
+  status       WalletStatus @default(ACTIVE)
   assignedById String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   assignedAt   DateTime?
   notes        String?
+
   deposits     Deposit[]
   transactions Transaction[]
-  assignedBy   User?         @relation("WalletAssignedBy", fields: [assignedById], references: [id])
-  currency     Currency      @relation(fields: [currencyId], references: [id])
-  network      Network?      @relation(fields: [networkId], references: [id])
-  portfolio    Portfolio     @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
   withdrawals  Withdrawal[]
+
+  assignedBy User?     @relation("WalletAssignedBy", fields: [assignedById], references: [id])
+  currency   Currency  @relation(fields: [currencyId], references: [id])
+  network    Network?  @relation(fields: [networkId], references: [id])
+  portfolio  Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  key WalletKey?
+}
+
+model WalletKey {
+  id                  String   @id @default(cuid())
+  walletId            String   @unique
+  encryptedPrivateKey String
+  publicKey           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
