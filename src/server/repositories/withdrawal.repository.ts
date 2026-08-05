@@ -26,9 +26,7 @@ export class WithdrawalRepository {
 
   async findById(id: string) {
     return prisma.withdrawal.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
       include: {
         wallet: {
           include: {
@@ -57,10 +55,41 @@ export class WithdrawalRepository {
     data: Prisma.WithdrawalUpdateInput
   ) {
     return prisma.withdrawal.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async approve(id: string) {
+    return prisma.withdrawal.update({
       where: {
         id,
       },
-      data,
+      data: {
+        approved: true,
+      },
+    });
+  }
+
+  async reject(id: string) {
+    return prisma.withdrawal.update({
+      where: {
+        id,
+      },
+      data: {
+        approved: false,
+      },
+    });
+  }
+
+  async markProcessed(id: string) {
+    return prisma.withdrawal.update({
+      where: {
+        id,
+      },
+      data: {
+        processed: true,
+      },
     });
   }
 
