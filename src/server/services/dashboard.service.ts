@@ -36,6 +36,44 @@ export class DashboardService {
     return userRepository.findAllWithPortfolios();
   }
 
+  async getUserDetails(userId: string) {
+    return prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        portfolios: {
+          include: {
+            wallets: {
+              include: {
+                currency: true,
+                network: true,
+                deposits: {
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                  take: 5,
+                },
+                withdrawals: {
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                  take: 5,
+                },
+                transactions: {
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                  take: 10,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   // ----------------------------
   // User Dashboard
   // ----------------------------
