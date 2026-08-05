@@ -1,57 +1,78 @@
-export default function PortfolioChart() {
+"use client";
+
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+
+interface PortfolioChartProps {
+  data: {
+    date: string;
+    value: number;
+  }[];
+}
+
+export default function PortfolioChart({
+  data,
+}: PortfolioChartProps) {
   return (
-    <section className="bg-[#111827] border border-gray-800 rounded-2xl p-6 h-full">
+    <section className="rounded-2xl border border-gray-800 bg-[#111827] p-6 h-full">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-white">
             Portfolio Performance
           </h2>
 
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="mt-1 text-sm text-gray-400">
             Portfolio value over time
           </p>
         </div>
 
         <div className="flex gap-2">
-          <button className="px-3 py-1 rounded-lg bg-cyan-500 text-black text-sm font-medium">
-            7D
-          </button>
-
-          <button className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm">
-            30D
-          </button>
-
-          <button className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm">
-            90D
-          </button>
-
-          <button className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm">
-            1Y
+          <button className="rounded-lg bg-cyan-500 px-3 py-1 text-sm font-medium text-black">
+            All
           </button>
         </div>
       </div>
 
-      <div className="mt-8 h-80 rounded-xl bg-[#0B0F19] border border-dashed border-cyan-500/30 flex flex-col items-center justify-center">
-        <div className="w-full px-10">
-          <div className="relative h-40">
-            <svg
-              viewBox="0 0 600 200"
-              className="w-full h-full"
-              fill="none"
-            >
-              <path
-                d="M0 170 C60 150, 120 120, 180 130 S300 70, 360 90 S480 30, 600 40"
-                stroke="#22D3EE"
-                strokeWidth="4"
-                fill="none"
-              />
-            </svg>
+      <div className="mt-8 h-80">
+        {data.length === 0 ? (
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-cyan-500/30 bg-[#0B0F19]">
+            <p className="text-gray-400">
+              No portfolio history yet.
+            </p>
           </div>
-        </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
 
-        <p className="text-gray-400 mt-6">
-          Interactive portfolio chart will appear here.
-        </p>
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12 }}
+              />
+
+              <YAxis
+                tick={{ fontSize: 12 }}
+              />
+
+              <Tooltip />
+
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#22D3EE"
+                strokeWidth={3}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </section>
   );

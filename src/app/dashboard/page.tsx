@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { dashboardService } from "@/server/services/dashboard.service";
+import { analyticsService } from "@/server/services/analytics.service";
 
 import StatCard from "@/components/dashboard/StatCard";
 import PortfolioChart from "@/components/dashboard/PortfolioChart";
@@ -18,14 +19,15 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const stats = await dashboardService.getDashboardStats(
-    (session.user as any).id
-  );
+  const userId = (session.user as any).id;
+
+  const [stats, history] = await Promise.all([
+    dashboardService.getDashboardStats(userId),
+    analyticsService.getPortfolioHistory(userId),
+  ]);
 
   return (
     <>
-      {/* Welcome */}
-
       <section>
         <h1 className="text-4xl font-bold text-white">
           Welcome to ColdWallet
@@ -37,8 +39,6 @@ export default async function DashboardPage() {
           professional platform.
         </p>
       </section>
-
-      {/* Statistics */}
 
       <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -66,25 +66,18 @@ export default async function DashboardPage() {
         />
       </section>
 
-      {/* Portfolio */}
-
       <section className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <PortfolioChart />
+          <PortfolioChart data={history} />
         </div>
 
         <Watchlist />
       </section>
 
-      {/* Bottom */}
-
       <section className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <RecentActivity />
-
         <SecurityScore />
       </section>
-
-      {/* Quick Actions */}
 
       <section className="mt-10">
         <QuickActions />
