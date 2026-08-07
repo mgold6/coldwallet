@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AssignWalletDialog from "@/app/dashboard/admin/components/AssignWalletDialog";
 import { dashboardService } from "@/server/services/dashboard.service";
 
 export default async function UsersPage() {
@@ -88,13 +89,20 @@ export default async function UsersPage() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <Link
-                      href={`/admin/users/${user.id}`}
-                      className="rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-500"
-                    >
-                      View
-                    </Link>
-                  </td>
+  <div className="flex items-center gap-2">
+    <Link
+      href={`/admin/users/${user.id}`}
+      className="rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-500"
+    >
+      View
+    </Link>
+
+    <AssignWalletDialog
+      userId={user.id}
+      userName={user.name ?? user.email}
+    />
+  </div>
+</td>
                 </tr>
               );
             })}

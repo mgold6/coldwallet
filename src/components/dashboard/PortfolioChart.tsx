@@ -10,70 +10,131 @@ import {
   CartesianGrid,
 } from "recharts";
 
-interface PortfolioChartProps {
-  data: {
-    date: string;
-    value: number;
-  }[];
-}
 
-export default function PortfolioChart({
-  data,
-}: PortfolioChartProps) {
-  return (
-    <section className="rounded-2xl border border-gray-800 bg-[#111827] p-6 h-full">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-white">
-            Portfolio Performance
-          </h2>
+const data = [
+  {
+    time: "00:00",
+    value: 13200000,
+  },
+  {
+    time: "04:00",
+    value: 13350000,
+  },
+  {
+    time: "08:00",
+    value: 13420000,
+  },
+  {
+    time: "12:00",
+    value: 13600000,
+  },
+  {
+    time: "16:00",
+    value: 13550000,
+  },
+  {
+    time: "20:00",
+    value: 13634453,
+  },
+];
 
-          <p className="mt-1 text-sm text-gray-400">
-            Portfolio value over time
-          </p>
-        </div>
 
-        <div className="flex gap-2">
-          <button className="rounded-lg bg-cyan-500 px-3 py-1 text-sm font-medium text-black">
-            All
-          </button>
-        </div>
-      </div>
+export default function PortfolioChart() {
 
-      <div className="mt-8 h-80">
-        {data.length === 0 ? (
-          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-cyan-500/30 bg-[#0B0F19]">
-            <p className="text-gray-400">
-              No portfolio history yet.
-            </p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
+return (
 
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 12 }}
-              />
+<div
+className="
+rounded-3xl
+border
+border-slate-800
+bg-slate-950
+p-6
+"
+>
 
-              <YAxis
-                tick={{ fontSize: 12 }}
-              />
+<h2 className="text-xl font-semibold text-white">
 
-              <Tooltip />
+Portfolio Performance
 
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#22D3EE"
-                strokeWidth={3}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-    </section>
-  );
+</h2>
+
+
+<p className="mt-2 text-sm text-slate-400">
+
+Asset value movement
+
+</p>
+
+
+<div
+className="
+mt-6
+h-72
+"
+>
+
+<ResponsiveContainer
+width="100%"
+height="100%"
+>
+
+<LineChart
+data={data}
+>
+
+
+<CartesianGrid
+strokeDasharray="3 3"
+/>
+
+
+<XAxis
+dataKey="time"
+stroke="#94a3b8"
+/>
+
+
+<YAxis
+stroke="#94a3b8"
+tickFormatter={(value)=>`$${(value/1000000).toFixed(1)}M`}
+/>
+
+
+<Tooltip
+formatter={(value)=>[
+`$${Number(value).toLocaleString()}`,
+"Portfolio"
+]}
+/>
+
+
+<Line
+
+type="monotone"
+
+dataKey="value"
+
+stroke="#06b6d4"
+
+strokeWidth={3}
+
+dot={false}
+
+/>
+
+
+</LineChart>
+
+
+</ResponsiveContainer>
+
+
+</div>
+
+
+</div>
+
+);
+
 }

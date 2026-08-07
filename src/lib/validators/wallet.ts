@@ -7,11 +7,13 @@ export const assignWalletSchema = z.object({
 
   networkId: z.string().optional(),
 
+  generate: z.boolean().optional().default(false),
+
   address: z
     .string()
     .trim()
-    .min(10, "Wallet address is too short")
-    .max(200),
+    .max(200)
+    .optional(),
 
   label: z
     .string()

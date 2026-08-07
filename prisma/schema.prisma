@@ -132,30 +132,31 @@ model Portfolio {
 }
 
 model Wallet {
-  id           String       @id @default(cuid())
-  portfolioId  String
-  currencyId   String
-  networkId    String?
-  address      String       @unique
-  label        String?
-  balance      Decimal      @default(0.0)
-  status       WalletStatus @default(ACTIVE)
-  assignedById String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  assignedAt   DateTime?
-  notes        String?
-
-  deposits     Deposit[]
-  transactions Transaction[]
-  withdrawals  Withdrawal[]
-
-  assignedBy User?     @relation("WalletAssignedBy", fields: [assignedById], references: [id])
-  currency   Currency  @relation(fields: [currencyId], references: [id])
-  network    Network?  @relation(fields: [networkId], references: [id])
-  portfolio  Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-
-  key WalletKey?
+  id                String        @id @default(cuid())
+  portfolioId       String
+  currencyId        String
+  networkId         String?
+  address           String        @unique
+  label             String?
+  balance           Decimal       @default(0.0)
+  status            WalletStatus  @default(ACTIVE)
+  assignedById      String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  assignedAt        DateTime?
+  notes             String?
+  availableBalance  Decimal       @default(0.0)
+  blockchainBalance Decimal       @default(0.0)
+  internalBalance   Decimal       @default(0.0)
+  lockedBalance     Decimal       @default(0.0)
+  deposits          Deposit[]
+  transactions      Transaction[]
+  assignedBy        User?         @relation("WalletAssignedBy", fields: [assignedById], references: [id])
+  currency          Currency      @relation(fields: [currencyId], references: [id])
+  network           Network?      @relation(fields: [networkId], references: [id])
+  portfolio         Portfolio     @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  key               WalletKey?
+  withdrawals       Withdrawal[]
 }
 
 model WalletKey {
@@ -165,53 +166,85 @@ model WalletKey {
   publicKey           String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  wallet              Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
-  id              String            @id @default(cuid())
-  walletId        String
-  currencyId      String
-  networkId       String?
-  type            TransactionType
-  status          TransactionStatus
-  txHash          String?
-  amount          Decimal
-  fee             Decimal           @default(0.0)
-  fromAddress     String?
-  toAddress       String?
-  confirmations   Int               @default(0)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  confirmedAt     DateTime?
+  id         String  @id @default(cuid())
+  walletId   String
+  currencyId String
+  networkId  String?
+
+  type   TransactionType
+  status TransactionStatus
+
+  txHash String?
+
+  // ColdWallet internal tracking
+  internalReference String? @unique
+  transactionSource String  @default("INTERNAL")
+
+  // User visibility control
+  showInHistory Boolean @default(true)
+
+  // Blockchain tracking
+  blockchainNetwork  String?
+  explorerUrl        String?
+  blockchainVerified Boolean @default(false)
+
+  amount       Decimal
+  usdAmount    Decimal @default(0)
+  exchangeRate Decimal @default(0)
+
+  fee Decimal @default(0.0)
+
+  fromAddress String?
+  toAddress   String?
+
+  confirmations Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  confirmedAt DateTime?
+
   notes           String?
   transactionDate DateTime?
-  deposit         Deposit?
-  currency        Currency          @relation(fields: [currencyId], references: [id])
-  network         Network?          @relation(fields: [networkId], references: [id])
-  wallet          Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  withdrawal      Withdrawal?
+
+  deposit    Deposit?
+  withdrawal Withdrawal?
+
+  currency Currency @relation(fields: currencyId, references: id)
+  network  Network? @relation(fields: networkId, references: id)
+  wallet   Wallet   @relation(fields: walletId, references: id, onDelete: Cascade)
 }
 
 model Deposit {
-  id            String      @id @default(cuid())
-  transactionId String      @unique
+  id String @id @default(cuid())
+
+  transactionId String  @unique
   walletId      String
   currencyId    String
   networkId     String?
-  amount        Decimal
-  confirmed     Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  confirmedAt   DateTime?
-  creditedAt    DateTime?
-  depositDate   DateTime?
-  notes         String?
-  currency      Currency    @relation(fields: [currencyId], references: [id])
-  network       Network?    @relation(fields: [networkId], references: [id])
-  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  wallet        Wallet      @relation(fields: [walletId], references: [id])
+
+  amount    Decimal
+  usdAmount Decimal @default(0)
+
+  confirmed Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  confirmedAt DateTime?
+  creditedAt  DateTime?
+  depositDate DateTime?
+
+  notes String?
+
+  currency    Currency    @relation(fields: currencyId, references: id)
+  network     Network?    @relation(fields: networkId, references: id)
+  transaction Transaction @relation(fields: transactionId, references: id, onDelete: Cascade)
+  wallet      Wallet      @relation(fields: walletId, references: id)
 }
 
 model Withdrawal {

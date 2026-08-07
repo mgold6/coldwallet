@@ -1,39 +1,27 @@
-import { Currency } from "@prisma/client";
-
-import { bitcoinProvider } from "./providers/bitcoin.provider";
-import { ethereumProvider } from "./providers/ethereum.provider";
 import { encryptionService } from "./encryption.service";
+import { blockchainProviders } from "./providers/provider-registry";
 
 export class WalletGeneratorService {
   async generate(currencyCode: string) {
-    switch (currencyCode.toUpperCase()) {
-      case "BTC": {
-        const wallet = await bitcoinProvider.generateWallet();
+    const provider =
+      blockchainProviders[
+        currencyCode.toUpperCase() as keyof typeof blockchainProviders
+      ];
 
-        return {
-          ...wallet,
-          encryptedPrivateKey: wallet.privateKey
-            ? encryptionService.encrypt(wallet.privateKey)
-            : undefined,
-        };
-      }
-
-      case "ETH": {
-        const wallet = await ethereumProvider.generateWallet();
-
-        return {
-          ...wallet,
-          encryptedPrivateKey: wallet.privateKey
-            ? encryptionService.encrypt(wallet.privateKey)
-            : undefined,
-        };
-      }
-
-      default:
-        throw new Error(
-          `Wallet generation is not yet supported for ${currencyCode}.`
-        );
+    if (!provider) {
+      throw new Error(
+        `Wallet generation is not yet supported for ${currencyCode}.`
+      );
     }
+
+    const wallet = await provider.generateWallet();
+
+    return {
+      ...wallet,
+      encryptedPrivateKey: wallet.privateKey
+        ? encryptionService.encrypt(wallet.privateKey)
+        : undefined,
+    };
   }
 }
 

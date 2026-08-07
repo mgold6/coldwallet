@@ -1,45 +1,77 @@
 import Link from "next/link";
 
+const actions = [
+  {
+    name: "Send",
+    icon: "↗",
+    href: "/dashboard/send",
+  },
+  {
+    name: "Receive",
+    icon: "↓",
+    href: "/dashboard/receive",
+  },
+  {
+    name: "Swap",
+    icon: "⇄",
+    href: "/dashboard/swap",
+    active: true,
+  },
+  {
+    name: "Buy",
+    icon: "+",
+    href: "/dashboard/buy",
+  },
+];
+
+
 export default function QuickActions() {
   return (
-    <div className="rounded-2xl border border-gray-800 bg-[#111827] p-6">
+    <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
 
-      <h2 className="mb-6 text-2xl font-semibold text-white">
-        Quick Actions
-      </h2>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {actions.map((action) => (
 
         <Link
-          href="/dashboard/portfolio"
-          className="rounded-xl bg-blue-600 p-5 text-center font-semibold transition hover:bg-blue-700"
+          key={action.name}
+          href={action.href}
+          className={`
+            rounded-2xl
+            p-5
+            text-center
+            transition
+            duration-200
+            hover:-translate-y-1
+
+            ${
+              action.active
+                ? `
+                  bg-cyan-400
+                  text-slate-900
+                  hover:bg-cyan-300
+                `
+                : `
+                  bg-slate-800
+                  text-white
+                  hover:bg-slate-700
+                `
+            }
+          `}
         >
-          Add Asset
+
+          <div className="text-3xl font-light">
+            {action.icon}
+          </div>
+
+
+          <p className="mt-3 font-semibold">
+            {action.name}
+          </p>
+
+
         </Link>
 
-        <Link
-          href="/dashboard/wallets"
-          className="rounded-xl bg-cyan-600 p-5 text-center font-semibold transition hover:bg-cyan-700"
-        >
-          Connect Wallet
-        </Link>
+      ))}
 
-        <Link
-          href="/dashboard/markets"
-          className="rounded-xl bg-purple-600 p-5 text-center font-semibold transition hover:bg-purple-700"
-        >
-          Live Markets
-        </Link>
-
-        <Link
-          href="/learn"
-          className="rounded-xl bg-green-600 p-5 text-center font-semibold transition hover:bg-green-700"
-        >
-          Learning Center
-        </Link>
-
-      </div>
-
-    </div>
+    </section>
   );
 }
