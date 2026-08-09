@@ -8,27 +8,18 @@ import { marketService } from "@/server/services/market.service";
 
 import SendForm from "./components/SendForm";
 
-
 export default async function SendPage() {
-
-
   const session =
     await getServerSession(authOptions);
 
 
-
   if (!session) {
-
     redirect("/login");
-
   }
-
 
 
   const userId =
     (session.user as any).id;
-
-
 
 
   const [
@@ -46,14 +37,20 @@ export default async function SendPage() {
     ]);
 
 
-
-
+  const validWallets =
+  wallets
+    .filter(
+      (wallet) =>
+        wallet.address !== null
+    )
+    .map((wallet) => ({
+      ...wallet,
+      address: wallet.address!,
+    }));
 
 
   return (
-
     <div className="mx-auto max-w-xl space-y-8">
-
 
       <section>
 
@@ -66,25 +63,17 @@ export default async function SendPage() {
           Transfer digital assets securely.
         </p>
 
-
       </section>
-
-
-
 
 
       <SendForm
 
-        wallets={wallets}
+        wallets={validWallets}
 
         markets={markets}
 
       />
 
-
-
     </div>
-
   );
-
 }

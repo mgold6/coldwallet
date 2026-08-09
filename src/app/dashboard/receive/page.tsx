@@ -6,24 +6,16 @@ import { userWalletService } from "@/server/services/user-wallet.service";
 
 import ReceiveWallet from "./components/ReceiveWallet";
 
-
 export default async function ReceivePage() {
-
-
   const session =
     await getServerSession(authOptions);
-
-
 
   if (!session) {
     redirect("/login");
   }
 
-
-
   const userId =
     (session.user as any).id;
-
 
 
   const wallets =
@@ -32,11 +24,20 @@ export default async function ReceivePage() {
     );
 
 
+  const validWallets =
+  wallets
+    .filter(
+      (wallet) =>
+        wallet.address !== null
+    )
+    .map((wallet) => ({
+      ...wallet,
+      address: wallet.address!,
+    }));
+
 
   return (
-
     <div className="mx-auto max-w-xl space-y-8">
-
 
       <section>
 
@@ -49,19 +50,13 @@ export default async function ReceivePage() {
           Receive digital assets into your ColdWallet account.
         </p>
 
-
       </section>
 
 
-
-
       <ReceiveWallet
-        wallets={wallets}
+        wallets={validWallets}
       />
 
-
     </div>
-
   );
-
 }

@@ -16,18 +16,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-    >
+    <html lang="en">
+
       <body
-        className="min-h-full flex flex-col font-sans"
+        className="min-h-screen flex flex-col font-sans"
         style={{
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         }}
       >
+
         <Providers>
+
           {children}
 
           <Toaster
@@ -35,8 +35,11 @@ export default function RootLayout({
             richColors
             closeButton
           />
+
         </Providers>
+
       </body>
+
     </html>
   );
 }

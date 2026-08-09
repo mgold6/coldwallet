@@ -10,25 +10,25 @@ import {
 export default function SecurityFirst() {
   const securityItems = [
     {
-      icon: <FaLock className="text-5xl text-blue-500" />,
+      icon: <FaLock />,
       title: "Secure Authentication",
       description:
         "Protect your account with secure authentication and account recovery options.",
     },
     {
-      icon: <FaUserShield className="text-5xl text-blue-500" />,
+      icon: <FaUserShield />,
       title: "Privacy Focused",
       description:
         "Designed with privacy in mind so you stay in control of your personal information.",
     },
     {
-      icon: <FaBookOpen className="text-5xl text-blue-500" />,
+      icon: <FaBookOpen />,
       title: "Security Education",
       description:
         "Learn how to protect wallets, seed phrases, and digital assets through practical guidance.",
     },
     {
-      icon: <FaWallet className="text-5xl text-blue-500" />,
+      icon: <FaWallet />,
       title: "Portfolio Organization",
       description:
         "Organize your digital assets with clear tools designed to simplify portfolio management.",
@@ -36,8 +36,8 @@ export default function SecurityFirst() {
   ];
 
   return (
-    <section className="bg-[#05070D] py-28">
-      <div className="mx-auto max-w-7xl px-8">
+    <section className="bg-[#050816] py-32">
+      <div className="mx-auto max-w-7xl px-6">
 
         <SectionTitle
           badge="SECURITY FIRST"
@@ -45,22 +45,57 @@ export default function SecurityFirst() {
           description="ColdWallet helps users build confidence through education, organization, and security-focused tools designed for responsible digital asset management."
         />
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-20 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+
           {securityItems.map((item) => (
-            <Card key={item.title}>
-              <div className="mb-6">
-                {item.icon}
-              </div>
+            <Card
+              key={item.title}
+              className="
+                group
+                border
+                border-white/10
+                bg-[#111827]/70
+                backdrop-blur-xl
+                transition-all
+                duration-300
+                hover:-translate-y-2
+                hover:border-blue-500/40
+                hover:shadow-[0_0_40px_rgba(37,99,235,.18)]
+              "
+            >
+              <CardContent className="p-8">
 
-              <h3 className="mb-4 text-2xl font-bold text-white">
-                {item.title}
-              </h3>
+                <div
+                  className="
+                    mb-8
+                    flex
+                    h-16
+                    w-16
+                    items-center
+                    justify-center
+                    rounded-2xl
+                    bg-blue-600/10
+                    text-3xl
+                    text-blue-500
+                    transition
+                    group-hover:scale-110
+                  "
+                >
+                  {item.icon}
+                </div>
 
-              <p className="leading-7 text-gray-400">
-                {item.description}
-              </p>
+                <h3 className="mb-4 text-2xl font-semibold text-white">
+                  {item.title}
+                </h3>
+
+                <p className="leading-8 text-slate-400">
+                  {item.description}
+                </p>
+
+              </CardContent>
             </Card>
           ))}
+
         </div>
 
       </div>

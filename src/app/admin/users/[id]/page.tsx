@@ -503,9 +503,9 @@ export default async function UserDetailsPage({
 
 
                     <td className="px-6 py-4 font-mono text-sm text-white">
-
-                      {wallet.address.slice(0, 12)}...
-                      {wallet.address.slice(-8)}
+{wallet.address
+  ? `${wallet.address.slice(0, 12)}...${wallet.address.slice(-8)}`
+  : "Address not generated"}
 
                     </td>
 

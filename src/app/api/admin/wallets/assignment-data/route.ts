@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
+
 import { adminWalletService } from "@/server/services/admin-wallet.service";
 
-export async function GET(request: Request) {
+
+export async function GET(
+  request: Request
+) {
 
   const { searchParams } =
     new URL(request.url);
+
 
   const userId =
     searchParams.get("userId");
@@ -14,11 +19,11 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       {
-        success:false,
-        message:"Missing userId.",
+        success: false,
+        message: "Missing userId.",
       },
       {
-        status:400,
+        status: 400,
       }
     );
 
@@ -28,35 +33,51 @@ export async function GET(request: Request) {
   try {
 
     const data =
-      await adminWalletService.getAssignmentData(userId);
+      await adminWalletService.getAssignmentData(
+        userId
+      );
 
 
     return NextResponse.json({
 
-      success:true,
+      success: true,
 
-      currencies:
-        data.currencies ?? [],
+      data: {
+
+        portfolios:
+          data.portfolios ?? [],
+
+        currencies:
+          data.currencies ?? [],
+
+      },
 
     });
 
 
-  } catch(error) {
+  } catch (error) {
+
+
+    console.error(
+      "ASSIGNMENT DATA ERROR:",
+      error
+    );
 
 
     return NextResponse.json(
 
       {
-        success:false,
+        success: false,
 
         message:
           error instanceof Error
-          ? error.message
-          : "Unknown error.",
+            ? error.message
+            : "Unknown error.",
+
       },
 
       {
-        status:500,
+        status: 500,
       }
 
     );

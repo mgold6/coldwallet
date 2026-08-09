@@ -1,560 +1,558 @@
-import Link from "next/link";
-
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 
+import prisma from "@/lib/prisma";
+
 import { marketService } from "@/server/services/market.service";
 import { userWalletService } from "@/server/services/user-wallet.service";
 
-import {
-Wallet,
-TrendingUp,
-PieChart,
-} from "lucide-react";
-
+import PortfolioSelector from "@/components/dashboard/PortfolioSelector";
 
 export const dynamic = "force-dynamic";
 
-
 export default async function PortfolioPage() {
+  const session = await getServerSession(authOptions);
 
+  if (!session) {
+    redirect("/login");
+  }
 
-const session =
-await getServerSession(authOptions);
+  const userId = (session.user as any).id;
 
 
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
 
-if (!session) {
+    select: {
+      selectedPortfolioId: true,
+    },
+  });
 
-redirect("/login");
 
-}
+  const [
+    portfolios,
+    markets,
+  ] = await Promise.all([
 
+    prisma.portfolio.findMany({
+      where: {
+        userId,
+        isActive: true,
+      },
 
+      orderBy: [
+        {
+          isDefault: "desc",
+        },
 
-const userId =
-(session.user as any).id;
+        {
+          createdAt: "asc",
+        },
+      ],
+    }),
 
 
+    marketService.getMarkets(),
 
-const [
-markets,
-wallets,
-] =
-await Promise.all([
+  ]);
 
-marketService.getMarkets(),
 
-userWalletService.getUserWallets(
-userId
-),
 
-]);
+  const activePortfolio =
+    portfolios.find(
+      (portfolio) =>
+        portfolio.id === user?.selectedPortfolioId
+    )
+    ??
+    portfolios.find(
+      (portfolio) =>
+        portfolio.isDefault
+    )
+    ??
+    portfolios[0];
 
 
 
-const portfolio =
-wallets.map((wallet)=>{
+  let wallets: Awaited<
+    ReturnType<
+      typeof userWalletService.getPortfolioWallets
+    >
+  > = [];
 
 
-const symbol =
-wallet.currency.code.toUpperCase();
 
+  if (activePortfolio) {
 
+    wallets =
+      await userWalletService.getPortfolioWallets(
+        activePortfolio.id
+      );
 
-const market =
-markets.find(
-(coin)=>
-coin.symbol.toUpperCase() === symbol
-);
+  }
 
 
 
-const balance =
-Number(
-wallet.balance ??
-wallet.availableBalance ??
-0
-);
+  const holdings = wallets.map((wallet) => {
 
+    const symbol =
+      wallet.currency.code.toUpperCase();
 
 
-const value =
-market
-?
-balance * market.current_price
-:
-0;
 
+    const market =
+      markets.find(
+        (coin) =>
+          coin.symbol.toUpperCase() === symbol
+      );
 
 
-return {
 
-symbol,
+    const balance =
+      Number(
+        wallet.balance ?? 0
+      );
 
-name:
-wallet.currency.name,
 
-balance,
 
-value,
+    const value =
+      market
+        ? balance * market.current_price
+        : 0;
 
-change:
-market?.price_change_percentage_24h ?? 0,
 
-market,
 
-};
+    return {
 
+      symbol,
 
-});
+      name:
+        wallet.currency.name,
 
+      image:
+        market?.image ?? null,
 
+      price:
+        market?.current_price ?? 0,
 
-const totalValue =
-portfolio.reduce(
-(total,asset)=>
-total + asset.value,
-0
-);
+      balance,
 
+      value,
 
+      change:
+        market?.price_change_percentage_24h ?? 0,
 
-const totalChange =
-portfolio.reduce(
-(total,asset)=>
+    };
 
-total +
-(
-asset.value *
-(asset.change / 100)
-),
+  });
 
-0
-);
 
 
+  const totalBalance =
+    holdings.reduce(
+      (total, item) =>
+        total + item.value,
+      0
+    );
 
-return (
 
-<div className="space-y-8">
 
+  const totalChange =
+    holdings.reduce(
+      (total, item) =>
+        total +
+        (
+          item.value *
+          (
+            item.change / 100
+          )
+        ),
+      0
+    );
 
 
-{/* Header */}
 
-<div>
+  return (
 
-<h1 className="text-3xl font-bold text-white">
+    <div className="space-y-8">
 
-Portfolio
 
-</h1>
+      {/* Header */}
 
+      <div>
 
-<p className="mt-2 text-slate-400">
+        <h1 className="text-3xl font-bold text-white">
+          Portfolio
+        </h1>
 
-Track your digital asset holdings and performance.
 
-</p>
+        <p className="mt-2 text-slate-400">
+          Select a portfolio to manage its wallets and holdings.
+        </p>
 
-</div>
+      </div>
 
 
 
+      {/* Portfolio Selector */}
 
+      <PortfolioSelector
+        portfolios={portfolios}
+        selectedId={
+          activePortfolio?.id ?? ""
+        }
+      />
 
-{/* Summary Cards */}
 
-<div className="grid gap-6 md:grid-cols-3">
 
+      {/* Selected Portfolio */}
 
-<div
-className="
-rounded-2xl
-border
-border-slate-800
-bg-slate-950
-p-6
-"
->
+      {activePortfolio && (
 
-<Wallet className="text-cyan-400"/>
+        <div className="
+          rounded-2xl
+          border
+          border-slate-800
+          bg-slate-900
+          p-6
+        ">
 
+          <p className="text-sm text-slate-400">
+            Selected Portfolio
+          </p>
 
-<p className="mt-4 text-slate-400">
 
-Total Balance
+          <h2 className="
+            mt-1
+            text-2xl
+            font-bold
+            text-white
+          ">
+            {activePortfolio.name}
+          </h2>
 
-</p>
 
+        </div>
 
-<h2 className="mt-2 text-3xl font-bold text-white">
+      )}
 
-$
-{totalValue.toLocaleString(
-undefined,
-{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-}
-)}
 
-</h2>
 
-</div>
+      {/* Summary */}
 
+      <div className="grid gap-6 md:grid-cols-2">
 
 
+        <div className="
+          rounded-2xl
+          border
+          border-slate-800
+          bg-slate-900
+          p-6
+        ">
 
+          <p className="text-sm text-slate-400">
+            Total Balance
+          </p>
 
-<div
-className="
-rounded-2xl
-border
-border-slate-800
-bg-slate-950
-p-6
-"
->
 
-<TrendingUp className="text-green-400"/>
+          <p className="
+            mt-2
+            text-4xl
+            font-bold
+            text-white
+          ">
+            $
+            {totalBalance.toLocaleString(
+              undefined,
+              {
+                minimumFractionDigits:2,
+                maximumFractionDigits:2,
+              }
+            )}
 
+          </p>
 
-<p className="mt-4 text-slate-400">
 
-24H Performance
+        </div>
 
-</p>
 
 
-<h2 className="mt-2 text-3xl font-bold text-green-400">
+        <div className="
+          rounded-2xl
+          border
+          border-slate-800
+          bg-slate-900
+          p-6
+        ">
 
-+
-$
-{totalChange.toLocaleString(
-undefined,
-{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-}
-)}
 
-</h2>
+          <p className="text-sm text-slate-400">
+            24H Performance
+          </p>
 
 
-</div>
+          <p className={`
+            mt-2
+            text-4xl
+            font-bold
+            ${
+              totalChange >= 0
+              ? "text-green-400"
+              : "text-red-400"
+            }
+          `}>
 
+            {totalChange >= 0 ? "+" : "-"}$
 
+            {Math.abs(totalChange).toLocaleString(
+              undefined,
+              {
+                minimumFractionDigits:2,
+                maximumFractionDigits:2,
+              }
+            )}
 
+          </p>
 
 
-<div
-className="
-rounded-2xl
-border
-border-slate-800
-bg-slate-950
-p-6
-"
->
+        </div>
 
-<PieChart className="text-purple-400"/>
 
+      </div>
 
-<p className="mt-4 text-slate-400">
 
-Assets
 
-</p>
 
+      {/* Assigned Wallets */}
 
-<h2 className="mt-2 text-3xl font-bold text-white">
 
-{portfolio.length}
+      <div className="
+        rounded-2xl
+        border
+        border-slate-800
+        bg-slate-900
+      ">
 
-</h2>
 
+        <div className="
+          border-b
+          border-slate-800
+          p-6
+        ">
 
-</div>
+          <h2 className="
+            text-xl
+            font-semibold
+            text-white
+          ">
+            Assigned Wallets
+          </h2>
 
 
-</div>
+          <p className="
+            mt-1
+            text-sm
+            text-slate-400
+          ">
+            Wallets assigned to the selected portfolio.
+          </p>
 
 
+        </div>
 
 
 
 
+        <div className="p-6">
 
 
-{/* Allocation */}
+          {holdings.length === 0 ? (
 
-<div
-className="
-rounded-2xl
-border
-border-slate-800
-bg-slate-950
-p-6
-"
->
 
-<h2 className="text-xl font-semibold text-white">
+            <div className="
+              py-10
+              text-center
+              text-slate-400
+            ">
+              No assigned wallets in this portfolio.
+            </div>
 
-Portfolio Allocation
 
-</h2>
+          ) : (
 
 
+            <div className="space-y-3">
 
-<div className="mt-6 space-y-4">
 
+              {holdings.map((asset) => (
 
-{
-portfolio.map((asset)=>{
 
+                <div
+                  key={asset.symbol}
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    rounded-2xl
+                    bg-slate-950
+                    p-5
+                    border
+                    border-slate-800
+                  "
+                >
 
-const percentage =
-totalValue > 0
-?
-(asset.value / totalValue) * 100
-:
-0;
 
 
-return (
+                  <div className="
+                    flex
+                    items-center
+                    gap-4
+                  ">
 
-<div
-key={asset.symbol}
->
 
+                    <div className="
+                      flex
+                      h-12
+                      w-12
+                      items-center
+                      justify-center
+                      overflow-hidden
+                      rounded-full
+                      bg-slate-800
+                    ">
 
-<div className="flex justify-between">
 
-<span className="text-white">
+                      {asset.image ? (
 
-{asset.symbol}
+                        <img
+                          src={asset.image}
+                          alt={asset.name}
+                          className="
+                            h-10
+                            w-10
+                          "
+                        />
 
-</span>
+                      ) : (
 
+                        <span className="
+                          text-xl
+                          text-cyan-400
+                        ">
+                          ◉
+                        </span>
 
-<span className="text-slate-400">
+                      )}
 
-{percentage.toFixed(2)}%
 
-</span>
+                    </div>
 
 
-</div>
 
 
+                    <div>
 
-<div className="mt-2 h-2 rounded-full bg-slate-800">
 
+                      <p className="
+                        font-semibold
+                        text-white
+                      ">
+                        {asset.name}
+                      </p>
 
-<div
 
-className="
-h-full
-rounded-full
-bg-cyan-400
-"
+                      <p className="
+                        text-sm
+                        text-slate-400
+                      ">
 
-style={{
-width:`${percentage}%`
-}}
+                        {asset.balance.toLocaleString(
+                          undefined,
+                          {
+                            maximumFractionDigits:8,
+                          }
+                        )}
 
-/>
+                        {" "}
+                        {asset.symbol}
 
+                      </p>
 
-</div>
 
+                    </div>
 
-</div>
 
-)
+                  </div>
 
-})
 
-}
 
 
-</div>
 
+                  <div className="text-right">
 
-</div>
 
+                    <p className="
+                      font-bold
+                      text-white
+                    ">
 
+                      $
+                      {asset.value.toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits:2,
+                          maximumFractionDigits:2,
+                        }
+                      )}
 
+                    </p>
 
 
+                    <p className={`
+                      text-sm
+                      font-medium
+                      ${
+                        asset.change >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                      }
+                    `}>
 
+                      {asset.change >= 0 ? "+" : ""}
 
-{/* Holdings */}
+                      {asset.change.toFixed(2)}%
 
-<div
-className="
-rounded-2xl
-border
-border-slate-800
-bg-slate-950
-p-6
-"
->
+                    </p>
 
-<h2 className="text-xl font-semibold text-white">
 
-Holdings
+                  </div>
 
-</h2>
 
 
+                </div>
 
 
-<div className="mt-6 space-y-4">
+              ))}
 
 
-{
-portfolio.length === 0
+            </div>
 
-?
 
-<p className="text-slate-400">
+          )}
 
-No assets assigned yet.
 
-</p>
+        </div>
 
 
-:
+      </div>
 
 
-portfolio.map((asset)=>(
 
+    </div>
 
-<Link
-
-key={asset.symbol}
-
-href={`/dashboard/assets/${asset.symbol}`}
-
-className="
-block
-rounded-xl
-border
-border-slate-800
-p-5
-transition
-hover:bg-slate-900
-"
-
->
-
-
-<div className="flex justify-between">
-
-
-<div>
-
-
-<h3 className="font-semibold text-white">
-
-{asset.name}
-
-</h3>
-
-
-<p className="text-sm text-slate-400">
-
-{asset.balance.toLocaleString()} {asset.symbol}
-
-</p>
-
-
-{
-asset.market && (
-
-<p className="mt-2 text-sm text-slate-400">
-
-Price: $
-
-{asset.market.current_price.toLocaleString()}
-
-</p>
-
-)
-
-}
-
-
-</div>
-
-
-
-
-<div className="text-right">
-
-
-<p className="font-semibold text-white">
-
-$
-{asset.value.toLocaleString(
-undefined,
-{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-}
-)}
-
-</p>
-
-
-
-<p
-className={`
-text-sm
-${
-asset.change >=0
-?
-"text-green-400"
-:
-"text-red-400"
-}
-`}
->
-
-{asset.change >=0 ? "+" : ""}
-
-{asset.change.toFixed(2)}%
-
-</p>
-
-
-</div>
-
-
-</div>
-
-
-</Link>
-
-
-))
-
-}
-
-
-</div>
-
-
-</div>
-
-
-</div>
-
-);
-
+  );
 }

@@ -18,9 +18,7 @@ export async function GET(
 
   try {
 
-    const { id } =
-      await params;
-
+    const { id } = await params;
 
 
     const user =
@@ -84,15 +82,12 @@ export async function GET(
 
       success: true,
 
-      portfolios:
-        user.portfolios,
+      portfolios: user.portfolios,
 
     });
 
 
-
   } catch(error) {
-
 
     return NextResponse.json(
 
@@ -115,11 +110,9 @@ export async function GET(
 
     );
 
-
   }
 
 }
-
 
 
 
@@ -139,14 +132,11 @@ export async function POST(
 
   try {
 
-    const { id } =
-      await params;
-
+    const { id } = await params;
 
 
     const body =
       await request.json();
-
 
 
     const {
@@ -203,11 +193,9 @@ export async function POST(
 
         data: {
 
-          userId:
-            id,
+          userId: id,
 
-          name:
-            name.trim(),
+          name: name.trim(),
 
         },
 
@@ -245,7 +233,6 @@ export async function POST(
 
   } catch(error) {
 
-
     return NextResponse.json(
 
       {
@@ -267,7 +254,6 @@ export async function POST(
 
     );
 
-
   }
 
 }
@@ -277,8 +263,9 @@ export async function POST(
 
 
 
+// RENAME / UPDATE PORTFOLIO
 
-export async function DELETE(
+export async function PATCH(
   request: NextRequest
 ) {
 
@@ -291,16 +278,18 @@ export async function DELETE(
 
     const {
       portfolioId,
+      name,
     } = body;
 
 
 
-    if (!portfolioId) {
+    if (!portfolioId || !name?.trim()) {
 
       return NextResponse.json(
         {
           success: false,
-          message: "Portfolio ID is required.",
+          message:
+            "Portfolio ID and name are required.",
         },
         {
           status: 400,
@@ -333,7 +322,156 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          message: "Portfolio not found.",
+          message:
+            "Portfolio not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+
+    }
+
+
+
+    const updatedPortfolio =
+      await prisma.portfolio.update({
+
+        where: {
+
+          id: portfolioId,
+
+        },
+
+        data: {
+
+          name:
+            name.trim(),
+
+        },
+
+      });
+
+
+
+    await auditService.create({
+
+      action:
+        "PORTFOLIO_UPDATED",
+
+      entity:
+        "Portfolio",
+
+      entityId:
+        portfolioId,
+
+      metadata:
+        `Portfolio renamed from ${portfolio.name} to ${name.trim()} for ${portfolio.user.email}`,
+
+    });
+
+
+
+    return NextResponse.json({
+
+      success: true,
+
+      portfolio: updatedPortfolio,
+
+    });
+
+
+
+  } catch(error) {
+
+    return NextResponse.json(
+
+      {
+
+        success: false,
+
+        message:
+          error instanceof Error
+            ? error.message
+            : "Internal server error.",
+
+      },
+
+      {
+
+        status: 500,
+
+      }
+
+    );
+
+  }
+
+}
+
+
+
+
+
+
+export async function DELETE(
+  request: NextRequest
+) {
+
+  try {
+
+    const body =
+      await request.json();
+
+
+
+    const {
+      portfolioId,
+    } = body;
+
+
+
+    if (!portfolioId) {
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Portfolio ID is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+
+    }
+
+
+
+    const portfolio =
+      await prisma.portfolio.findUnique({
+
+        where: {
+          id: portfolioId,
+        },
+
+        include: {
+
+          user: true,
+
+        },
+
+      });
+
+
+
+    if (!portfolio) {
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Portfolio not found.",
         },
         {
           status: 404,
@@ -347,7 +485,9 @@ export async function DELETE(
     await prisma.portfolio.delete({
 
       where: {
+
         id: portfolioId,
+
       },
 
     });
@@ -385,7 +525,6 @@ export async function DELETE(
 
   } catch(error) {
 
-
     return NextResponse.json(
 
       {
@@ -406,7 +545,6 @@ export async function DELETE(
       }
 
     );
-
 
   }
 

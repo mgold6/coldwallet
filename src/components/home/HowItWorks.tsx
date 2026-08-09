@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import SectionTitle from "@/components/ui/SectionTitle";
 
 export default function HowItWorks() {
@@ -24,8 +24,9 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="bg-black py-28">
-      <div className="mx-auto max-w-7xl px-8">
+    <section className="bg-[#050816] py-24">
+
+      <div className="mx-auto max-w-7xl px-6">
 
         <SectionTitle
           badge="HOW IT WORKS"
@@ -33,27 +34,65 @@ export default function HowItWorks() {
           description="Getting started with ColdWallet is simple. Create your account, organize your assets, and continue learning with our educational platform."
         />
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {steps.map((step) => (
-            <Card key={step.number} className="text-center">
 
-              <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-3xl font-bold text-white">
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
+
+          {steps.map((step) => (
+            <Card
+              key={step.number}
+              className="
+                border
+                border-white/10
+                bg-[#111827]
+                p-10
+                text-center
+                shadow-xl
+                transition
+                duration-300
+                hover:-translate-y-2
+                hover:border-blue-500/40
+              "
+            >
+
+              <div
+                className="
+                  mx-auto
+                  mb-8
+                  flex
+                  h-20
+                  w-20
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-blue-600
+                  text-3xl
+                  font-bold
+                  text-white
+                  shadow-lg
+                  shadow-blue-600/30
+                "
+              >
                 {step.number}
               </div>
+
 
               <h3 className="mb-4 text-2xl font-bold text-white">
                 {step.title}
               </h3>
 
-              <p className="leading-7 text-gray-400">
+
+              <p className="leading-7 text-slate-400">
                 {step.description}
               </p>
 
+
             </Card>
           ))}
+
         </div>
 
       </div>
+
     </section>
   );
 }
