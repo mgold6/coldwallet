@@ -173,8 +173,9 @@ export default async function WalletsPage() {
                         "
                       >
 
-                        {wallet.address.slice(0, 10)}...
-                        {wallet.address.slice(-8)}
+                        {wallet.address
+  ? `${wallet.address.slice(0, 10)}...${wallet.address.slice(-8)}`
+  : "No address"}
 
                       </Link>
 
