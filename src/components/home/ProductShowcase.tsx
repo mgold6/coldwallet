@@ -79,7 +79,7 @@ export default function ProductShowcase() {
                   </p>
 
                   <h3 className="mt-2 break-words text-2xl font-bold text-white sm:text-4xl">
-                    $285,649,988.83
+                    Portfolio Tracking
                   </h3>
                 </div>
 
@@ -96,7 +96,7 @@ export default function ProductShowcase() {
                   </span>
 
                   <span className="break-words text-right font-semibold text-white">
-                    $122,511,852.65
+                    Tracked Asset
                   </span>
                 </div>
 
@@ -107,7 +107,7 @@ export default function ProductShowcase() {
                   </span>
 
                   <span className="font-semibold text-white">
-                    $94,228,654.90
+                    Tracked Asset
                   </span>
                 </div>
 
@@ -118,7 +118,7 @@ export default function ProductShowcase() {
                   </span>
 
                   <span className="font-semibold text-white">
-                    $50,904,480.22
+                    Tracked Asset
                   </span>
                 </div>
 

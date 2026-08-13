@@ -78,24 +78,22 @@ export default function DashboardPreview() {
               <div>
 
                 <p className="text-slate-400">
-                  Portfolio Overview
-                </p>
+  Portfolio Overview
+</p>
 
+<h2 className="mt-3 break-words text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+  Track Your Assets
+</h2>
 
-                <h2 className="mt-3 break-words text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-                  $285,649,988
-                </h2>
+<div className="mt-4 flex items-center gap-2 text-blue-400">
 
+  <ArrowUpRight className="h-5 w-5" />
 
-                <div className="mt-4 flex items-center gap-2 text-green-400">
+  <span className="font-semibold">
+    Organized portfolio insights
+  </span>
 
-                  <ArrowUpRight className="h-5 w-5" />
-
-                  <span className="font-semibold">
-                    +4.27% Today
-                  </span>
-
-                </div>
+</div>
 
               </div>
 

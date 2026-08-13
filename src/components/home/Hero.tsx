@@ -187,19 +187,17 @@ export default function Hero() {
             <div className="rounded-2xl bg-black/40 p-4 sm:p-6">
 
 
-              <p className="text-sm text-gray-500">
-                Portfolio Balance
-              </p>
+             <p className="text-sm text-gray-500">
+  Portfolio Tracking
+</p>
 
+<h3 className="mt-2 break-words text-3xl font-bold text-white sm:text-4xl">
+  Organize Your Assets
+</h3>
 
-              <h3 className="mt-2 break-words text-3xl font-bold text-white sm:text-4xl">
-                $285,649,988.83
-              </h3>
-
-
-              <p className="mt-3 text-sm text-green-400">
-                +4.27% Today
-              </p>
+<p className="mt-3 text-sm text-blue-400">
+  Clear portfolio insights
+</p>
 
 
             </div>
