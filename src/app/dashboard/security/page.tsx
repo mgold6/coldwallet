@@ -707,8 +707,7 @@ export default function SecurityPage() {
                   className="rounded-lg bg-slate-900 p-4"
                 >
                   <p className="text-white">
-                    {login.ipAddress ??
-                      "Unknown IP"}
+                    Login from this device
                   </p>
 
                   <p className="text-sm text-slate-400">
@@ -716,6 +715,7 @@ export default function SecurityPage() {
                       login.createdAt
                     ).toLocaleString()}
                   </p>
+
                 </div>
               )
             )}
