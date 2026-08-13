@@ -1,41 +1,18 @@
 import { NextResponse } from "next/server";
 
-import { getServerSession } from "next-auth";
-
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/admin-auth";
 
 import prisma from "@/lib/prisma";
 
-
-export async function POST(
-  request: Request
-) {
-
+export async function POST(request: Request) {
   try {
+    const { response } = await requireAdmin();
 
-    const session =
-      await getServerSession(
-        authOptions
-      );
-
-
-    if (!session) {
-
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      );
-
+    if (response) {
+      return response;
     }
 
-
-    const body =
-      await request.json();
-
+    const body = await request.json();
 
     const {
       key,
@@ -43,53 +20,34 @@ export async function POST(
       description,
     } = body;
 
-
-    if (
-      !key ||
-      !value
-    ) {
-
+    if (!key || !value) {
       return NextResponse.json(
         {
-          error:
-            "Key and value are required.",
+          error: "Key and value are required.",
         },
         {
           status: 400,
         }
       );
-
     }
-        const setting =
-      await prisma.systemSetting.upsert({
 
+    const setting =
+      await prisma.systemSetting.upsert({
         where: {
           key,
         },
 
-
         update: {
-
           value,
-
           description,
-
         },
-
 
         create: {
-
           key,
-
           value,
-
           description,
-
         },
-
       });
-
-
 
     return NextResponse.json(
       {
@@ -100,23 +58,17 @@ export async function POST(
         status: 200,
       }
     );
-
-
-  } catch (error: any) {
-
-
+  } catch (error) {
     return NextResponse.json(
       {
         error:
-          error.message ??
-          "Unable to save settings.",
+          error instanceof Error
+            ? error.message
+            : "Unable to save settings.",
       },
       {
         status: 500,
       }
     );
-
-
   }
-
 }

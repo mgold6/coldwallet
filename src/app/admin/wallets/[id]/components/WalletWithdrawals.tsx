@@ -1,5 +1,18 @@
 interface WalletWithdrawalsProps {
-  wallet: any;
+  wallet: {
+    currency: {
+      code: string;
+    };
+    withdrawals: Array<{
+      id: string;
+      amount: {
+        toString(): string;
+      };
+      createdAt: Date;
+      approved: boolean;
+      processed: boolean;
+    }>;
+  };
 }
 
 export default function WalletWithdrawals({
@@ -13,28 +26,35 @@ export default function WalletWithdrawals({
 
       {wallet.withdrawals?.length ? (
         <div className="space-y-4">
-          {wallet.withdrawals.map((withdrawal: any) => (
+          {wallet.withdrawals.map((withdrawal) => (
             <div
               key={withdrawal.id}
               className="flex items-center justify-between rounded-lg border border-slate-800 p-4"
             >
               <div>
                 <p className="font-semibold">
-                  {withdrawal.amount.toString()} {wallet.currency.code}
+                  {withdrawal.amount.toString()}{" "}
+                  {wallet.currency.code}
                 </p>
 
                 <p className="text-sm text-slate-400">
-                  {new Date(withdrawal.createdAt).toLocaleString()}
+                  {new Date(
+                    withdrawal.createdAt
+                  ).toLocaleString()}
                 </p>
               </div>
 
               <div className="text-right">
                 <p>
-                  {withdrawal.approved ? "✅ Approved" : "⏳ Pending"}
+                  {withdrawal.approved
+                    ? "✅ Approved"
+                    : "⏳ Pending"}
                 </p>
 
                 <p className="text-sm text-slate-400">
-                  {withdrawal.processed ? "Processed" : "Waiting"}
+                  {withdrawal.processed
+                    ? "Processed"
+                    : "Waiting"}
                 </p>
               </div>
             </div>

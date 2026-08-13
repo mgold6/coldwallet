@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
         </h1>
 
         <p className="mt-4 text-center text-gray-400">
-          Enter your email address and we'll send you instructions to reset your
+          Enter your email address and we&apos;ll send you instructions to reset your
           password.
         </p>
 

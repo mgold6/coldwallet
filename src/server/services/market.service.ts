@@ -39,7 +39,7 @@ export class MarketService {
 private getHeaders(): HeadersInit {
 
 const apiKey =
-process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+process.env.COINGECKO_API_KEY
 
 
 const headers: HeadersInit = {};

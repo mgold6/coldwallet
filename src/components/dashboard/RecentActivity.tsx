@@ -10,22 +10,25 @@ export default async function RecentActivity() {
     return null;
   }
 
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      wallet: {
-        portfolio: {
-          userId: (session.user as any).id,
+  const userId = session.user.id;
+
+  const transactions =
+    await prisma.transaction.findMany({
+      where: {
+        wallet: {
+          portfolio: {
+            userId,
+          },
         },
       },
-    },
-    include: {
-      currency: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 5,
-  });
+      include: {
+        currency: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+    });
 
   return (
     <div className="rounded-2xl border border-gray-800 bg-[#111827] p-6">

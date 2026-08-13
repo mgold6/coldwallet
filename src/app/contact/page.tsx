@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/home/Footer";
-import { Mail, ShieldCheck, BookOpen } from "lucide-react";
+import {
+  Mail,
+  ShieldCheck,
+  BookOpen,
+} from "lucide-react";
 
 export default function ContactPage() {
   return (
@@ -10,27 +13,26 @@ export default function ContactPage() {
 
       <section className="mx-auto max-w-7xl px-6 py-28">
         <div className="text-center">
-          <h1 className="text-5xl font-bold">Contact ColdWallet</h1>
+          <h1 className="text-5xl font-bold">
+            Contact ColdWallet
+          </h1>
 
           <p className="mx-auto mt-6 max-w-3xl text-xl text-gray-400">
             Have a question, need assistance, or want to partner with us?
-            Our support team is here to help. Send us a message and we'll
+            Our support team is here to help. Send us a message and we&apos;ll
             respond as quickly as possible.
           </p>
         </div>
 
         <div className="mt-20 grid gap-12 lg:grid-cols-2">
-
           {/* Contact Form */}
 
           <div className="rounded-2xl border border-gray-800 bg-[#111827] p-8">
-
             <h2 className="mb-8 text-3xl font-semibold">
               Send us a Message
             </h2>
 
             <form className="space-y-6">
-
               <div>
                 <label className="mb-2 block text-gray-300">
                   Full Name
@@ -85,21 +87,16 @@ export default function ContactPage() {
               >
                 Send Message
               </button>
-
             </form>
-
           </div>
 
           {/* Right Side */}
 
           <div className="space-y-8">
-
             {/* Support */}
 
             <div className="rounded-2xl border border-gray-800 bg-[#111827] p-8">
-
               <div className="flex items-center gap-4">
-
                 <Mail className="h-8 w-8 text-cyan-400" />
 
                 <div>
@@ -116,57 +113,40 @@ export default function ContactPage() {
                     questions, technical issues, security concerns,
                     partnerships, and general inquiries.
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
             {/* Platform */}
 
             <div className="rounded-2xl border border-gray-800 bg-[#111827] p-8">
-
-              <div className="flex items-center gap-4 mb-6">
-
+              <div className="mb-6 flex items-center gap-4">
                 <ShieldCheck className="h-8 w-8 text-cyan-400" />
 
                 <h3 className="text-2xl font-semibold">
                   Platform Features
                 </h3>
-
               </div>
 
               <ul className="space-y-4 text-gray-300">
-
                 <li>✔ Live Cryptocurrency Market Data</li>
-
                 <li>✔ Portfolio Organization</li>
-
                 <li>✔ Wallet Dashboard</li>
-
                 <li>✔ Security Monitoring</li>
-
                 <li>✔ Asset Tracking</li>
-
                 <li>✔ Educational Resources</li>
-
               </ul>
-
             </div>
 
             {/* Learning */}
 
             <div className="rounded-2xl border border-gray-800 bg-[#111827] p-8">
-
-              <div className="flex items-center gap-4 mb-6">
-
+              <div className="mb-6 flex items-center gap-4">
                 <BookOpen className="h-8 w-8 text-cyan-400" />
 
                 <h3 className="text-2xl font-semibold">
                   Learning Center
                 </h3>
-
               </div>
 
               <p className="leading-8 text-gray-400">
@@ -181,17 +161,10 @@ export default function ContactPage() {
               >
                 Visit Learning Center
               </Link>
-
             </div>
-
           </div>
-
         </div>
-
       </section>
-
-      <Footer />
-
     </main>
   );
 }

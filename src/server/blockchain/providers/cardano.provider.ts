@@ -5,23 +5,32 @@ import {
   WalletGenerationResult,
 } from "../types";
 
+type CardanoWasmModule =
+  typeof import("@emurgo/cardano-serialization-lib-nodejs");
+
+let cardanoWasmPromise:
+  | Promise<CardanoWasmModule>
+  | undefined;
+
+async function getCardanoWasm(): Promise<CardanoWasmModule> {
+  if (!cardanoWasmPromise) {
+    cardanoWasmPromise = import(
+      "@emurgo/cardano-serialization-lib-nodejs"
+    );
+  }
+
+  return cardanoWasmPromise;
+}
 
 export class CardanoProvider
   implements BlockchainProvider
 {
-
   async generateWallet(): Promise<WalletGenerationResult> {
-
     const CardanoWasm =
-      await import(
-        "@emurgo/cardano-serialization-lib-nodejs"
-      );
-
+      await getCardanoWasm();
 
     const entropy =
       randomBytes(32);
-
-
 
     const rootKey =
       CardanoWasm.Bip32PrivateKey
@@ -30,29 +39,21 @@ export class CardanoProvider
           Buffer.from("")
         );
 
-
-
     const accountKey =
       rootKey
         .derive(1852 + 0x80000000)
         .derive(1815 + 0x80000000)
         .derive(0 + 0x80000000);
 
-
-
     const paymentKey =
       accountKey
         .derive(0)
         .derive(0);
 
-
-
     const stakeKey =
       accountKey
         .derive(2)
         .derive(0);
-
-
 
     const paymentCredential =
       CardanoWasm.Credential
@@ -63,8 +64,6 @@ export class CardanoProvider
             .hash()
         );
 
-
-
     const stakeCredential =
       CardanoWasm.Credential
         .from_keyhash(
@@ -74,30 +73,20 @@ export class CardanoProvider
             .hash()
         );
 
-
-
     const baseAddress =
       CardanoWasm.BaseAddress.new(
         CardanoWasm.NetworkInfo.mainnet()
           .network_id(),
-
         paymentCredential,
-
         stakeCredential
-
       );
-
-
 
     const address =
       baseAddress
         .to_address()
         .to_bech32();
 
-
-
     return {
-
       address,
 
       publicKey:
@@ -107,56 +96,46 @@ export class CardanoProvider
             .as_bytes()
         ).toString("hex"),
 
-
       privateKey:
         Buffer.from(
           paymentKey.as_bytes()
         ).toString("hex"),
-
     };
-
   }
 
-
-
-  validateAddress(address: string): boolean {
-
+  validateAddress(
+    address: string
+  ): boolean {
+    /*
+     * The BlockchainProvider interface requires
+     * synchronous address validation.
+     *
+     * The Cardano WASM library is therefore loaded
+     * synchronously through require() only when
+     * validation is actually requested.
+     */
     try {
-
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const CardanoWasm =
         require(
           "@emurgo/cardano-serialization-lib-nodejs"
-        );
-
+        ) as CardanoWasmModule;
 
       CardanoWasm.Address
         .from_bech32(address);
 
-
       return true;
-
-
     } catch {
-
       return false;
-
     }
-
   }
 
-
-
-  getExplorerUrl(address: string): string {
-
-    return (
-      `https://cardanoscan.io/address/${address}`
-    );
-
+  getExplorerUrl(
+    address: string
+  ): string {
+    return `https://cardanoscan.io/address/${address}`;
   }
-
 }
-
-
 
 export const cardanoProvider =
   new CardanoProvider();

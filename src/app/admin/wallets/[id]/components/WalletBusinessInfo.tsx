@@ -1,5 +1,10 @@
 interface WalletBusinessInfoProps {
-  wallet: any;
+  wallet: {
+    assignedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+    notes: string | null;
+  };
 }
 
 function formatDate(date?: Date | null) {

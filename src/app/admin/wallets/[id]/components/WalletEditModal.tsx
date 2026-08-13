@@ -10,7 +10,13 @@ import SaveButton from "@/components/admin/buttons/SaveButton";
 import CancelButton from "@/components/admin/buttons/CancelButton";
 
 interface WalletEditModalProps {
-  wallet: any;
+  wallet: {
+    id: string;
+    label: string | null;
+    status: string;
+    assignedAt: Date | null;
+    notes: string | null;
+  };
   open: boolean;
   onClose: () => void;
 }
@@ -22,48 +28,52 @@ export default function WalletEditModal({
 }: WalletEditModalProps) {
   const router = useRouter();
 
-  const [label, setLabel] = useState(wallet.label ?? "");
+  const [label, setLabel] =
+    useState(wallet.label ?? "");
 
-  const [status, setStatus] = useState(wallet.status);
+  const [status, setStatus] =
+    useState(wallet.status);
 
-  const [assignedAt, setAssignedAt] = useState(
-    wallet.assignedAt
-      ? new Date(wallet.assignedAt)
-          .toISOString()
-          .slice(0, 16)
-      : ""
-  );
+  const [assignedAt, setAssignedAt] =
+    useState(
+      wallet.assignedAt
+        ? new Date(wallet.assignedAt)
+            .toISOString()
+            .slice(0, 16)
+        : ""
+    );
 
-  const [notes, setNotes] = useState(
-    wallet.notes ?? ""
-  );
+  const [notes, setNotes] =
+    useState(wallet.notes ?? "");
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
   async function save() {
     try {
       setSaving(true);
 
-      const response = await fetch(
-        "/api/admin/wallets",
-        {
-          method: "PATCH",
+      const response =
+        await fetch(
+          "/api/admin/wallets",
+          {
+            method: "PATCH",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-          body: JSON.stringify({
-            id: wallet.id,
-            label,
-            status,
-            assignedAt:
-              assignedAt || null,
-            notes,
-          }),
-        }
-      );
+            body: JSON.stringify({
+              id: wallet.id,
+              label,
+              status,
+              assignedAt:
+                assignedAt || null,
+              notes,
+            }),
+          }
+        );
 
       if (!response.ok) {
         throw new Error(

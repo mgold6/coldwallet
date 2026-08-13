@@ -1,5 +1,17 @@
 interface WalletOwnerProps {
-  wallet: any;
+  wallet: {
+    portfolio: {
+      name: string;
+      user: {
+        name: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        email: string;
+        status: string;
+        role: string;
+      };
+    };
+  };
 }
 
 export default function WalletOwner({

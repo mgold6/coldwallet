@@ -26,13 +26,42 @@ export function useMarket() {
   }
 
   useEffect(() => {
-    loadMarket();
+    let cancelled = false;
+
+    async function fetchMarket() {
+      try {
+        const data = await getMarketData();
+
+        if (cancelled) {
+          return;
+        }
+
+        setCoins(data);
+        setError("");
+      } catch (err) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error(err);
+        setError("Unable to load market data.");
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void fetchMarket();
 
     const interval = setInterval(() => {
-      loadMarket();
-    }, 60000); // Refresh every 60 seconds
+      void fetchMarket();
+    }, 60000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   return {

@@ -37,25 +37,25 @@ export default function DashboardPreview() {
   );
 
   return (
-    <section className="py-24">
+    <section className="py-16 sm:py-20 lg:py-24">
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         {/* Header */}
 
-        <div className="mb-12 text-center">
+        <div className="mb-10 text-center sm:mb-12">
 
-          <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-5 py-2 text-sm font-semibold tracking-wide text-blue-400">
+          <span className="inline-block rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-semibold tracking-wide text-blue-400 sm:px-5 sm:text-sm">
             PLATFORM PREVIEW
           </span>
 
 
-          <h2 className="mt-6 text-4xl font-bold text-white md:text-5xl">
+          <h2 className="mt-5 text-3xl font-bold leading-tight text-white sm:mt-6 sm:text-4xl md:text-5xl">
             Manage Everything in One Secure Dashboard
           </h2>
 
 
-          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-400">
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-400 sm:mt-5 sm:text-lg sm:leading-8">
             Organize wallets, monitor your portfolio, track markets,
             and strengthen your digital asset security from one place.
           </p>
@@ -71,7 +71,7 @@ export default function DashboardPreview() {
 
           {/* Portfolio Header */}
 
-          <div className="border-b border-white/10 p-8">
+          <div className="border-b border-white/10 p-5 sm:p-8">
 
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
 
@@ -82,7 +82,7 @@ export default function DashboardPreview() {
                 </p>
 
 
-                <h2 className="mt-3 text-5xl font-bold text-white">
+                <h2 className="mt-3 break-words text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
                   $285,649,988
                 </h2>
 
@@ -100,7 +100,7 @@ export default function DashboardPreview() {
               </div>
 
 
-              <div className="rounded-2xl bg-blue-500/10 p-5">
+              <div className="rounded-2xl bg-blue-500/10 p-4 sm:p-5">
 
                 <Wallet className="h-10 w-10 text-blue-400" />
 
@@ -116,16 +116,16 @@ export default function DashboardPreview() {
 
           {/* Content */}
 
-          <div className="grid gap-8 p-8 lg:grid-cols-[1.8fr_1fr]">
+          <div className="grid min-w-0 gap-5 p-4 sm:gap-8 sm:p-6 lg:grid-cols-[1.8fr_1fr] lg:p-8">
 
 
             {/* Chart */}
 
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-6">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-6">
 
-              <div className="mb-5 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
 
-                <h3 className="text-xl font-semibold text-white">
+                <h3 className="text-lg font-semibold text-white sm:text-xl">
                   Market Performance
                 </h3>
 
@@ -175,10 +175,10 @@ export default function DashboardPreview() {
 
                 <div
                   key={coin.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/30 p-4"
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/30 p-3 sm:p-4"
                 >
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
 
 
                     <div
@@ -194,7 +194,7 @@ export default function DashboardPreview() {
 
                     <div>
 
-                      <p className="font-semibold text-white">
+                      <p className="break-words font-semibold text-white">
                         {coin.symbol.toUpperCase()}
                       </p>
 
@@ -210,7 +210,7 @@ export default function DashboardPreview() {
 
 
 
-                  <div className="text-right">
+                  <div className="min-w-0 shrink-0 text-right">
 
                     <p className="font-semibold text-white">
                       $
@@ -248,10 +248,10 @@ export default function DashboardPreview() {
 
           {/* Security Cards */}
 
-          <div className="grid gap-6 border-t border-white/10 p-8 md:grid-cols-3">
+          <div className="grid gap-4 border-t border-white/10 p-4 sm:gap-6 sm:p-6 md:grid-cols-3 md:p-8">
 
 
-            <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 sm:p-5">
 
               <div className="flex items-center gap-3">
 

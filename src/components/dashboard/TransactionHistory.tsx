@@ -1,15 +1,28 @@
-interface TransactionHistoryProps {
-  transactions: any[];
+import { Prisma } from "@prisma/client";
+
+interface TransactionCurrency {
+  code: string;
+  name: string;
 }
 
+interface Transaction {
+  id: string;
+  type: string;
+  amount: Prisma.Decimal;
+  usdAmount?: Prisma.Decimal | string | number | null;
+  createdAt: Date;
+  status: string;
+  currency: TransactionCurrency;
+}
+
+interface TransactionHistoryProps {
+  transactions: Transaction[];
+}
 
 export default function TransactionHistory({
   transactions,
 }: TransactionHistoryProps) {
-
-
   return (
-
     <section
       className="
         rounded-3xl
@@ -19,16 +32,11 @@ export default function TransactionHistory({
         p-6
       "
     >
-
       <h2 className="mb-6 text-2xl font-bold text-white">
         Recent Activity
       </h2>
 
-
-
-
       {transactions.length === 0 ? (
-
         <div
           className="
             rounded-xl
@@ -40,36 +48,21 @@ export default function TransactionHistory({
         >
           No transactions yet.
         </div>
-
-
       ) : (
-
-
         <div className="space-y-4">
-
-
           {transactions.map((transaction) => {
-
-
             const isWithdrawal =
               transaction.type === "WITHDRAWAL";
 
+            const cryptoAmount = Number(
+              transaction.amount
+            );
 
-
-            const cryptoAmount =
-              Number(transaction.amount ?? 0);
-
-
-
-            const usdAmount =
-              Number(transaction.usdAmount ?? 0);
-
-
-
-
+            const usdAmount = Number(
+              transaction.usdAmount ?? 0
+            );
 
             return (
-
               <div
                 key={transaction.id}
                 className="
@@ -78,8 +71,6 @@ export default function TransactionHistory({
                   p-5
                 "
               >
-
-
                 <div
                   className="
                     flex
@@ -87,31 +78,18 @@ export default function TransactionHistory({
                     justify-between
                   "
                 >
-
-
-                  {/* LEFT */}
-
                   <div>
-
                     <p
                       className="
                         font-semibold
                         text-white
                       "
                     >
-
                       {isWithdrawal
                         ? "↗ Sent"
-                        : "↓ Received"
-                      }
-
-                      {" "}
-
+                        : "↓ Received"}{" "}
                       {transaction.currency.name}
-
                     </p>
-
-
 
                     <p
                       className="
@@ -120,26 +98,11 @@ export default function TransactionHistory({
                         text-slate-400
                       "
                     >
-
-                      {new Date(
-                        transaction.createdAt
-                      ).toLocaleString()}
-
+                      {transaction.createdAt.toLocaleString()}
                     </p>
-
-
                   </div>
 
-
-
-
-
-
-                  {/* RIGHT */}
-
                   <div className="text-right">
-
-
                     <p
                       className={`
                         text-lg
@@ -151,11 +114,7 @@ export default function TransactionHistory({
                         }
                       `}
                     >
-
-                      {isWithdrawal ? "-" : "+"}
-
-                      $
-
+                      {isWithdrawal ? "-" : "+"}$
                       {usdAmount.toLocaleString(
                         undefined,
                         {
@@ -163,11 +122,7 @@ export default function TransactionHistory({
                           maximumFractionDigits: 2,
                         }
                       )}
-
                     </p>
-
-
-
 
                     <p
                       className="
@@ -175,34 +130,17 @@ export default function TransactionHistory({
                         text-white
                       "
                     >
-
                       {cryptoAmount.toLocaleString(
                         undefined,
                         {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 8,
                         }
-                      )}
-
-                      {" "}
-
+                      )}{" "}
                       {transaction.currency.code}
-
                     </p>
-
-
                   </div>
-
-
                 </div>
-
-
-
-
-
-
-
-                {/* STATUS */}
 
                 <div
                   className="
@@ -213,45 +151,22 @@ export default function TransactionHistory({
                     text-sm
                   "
                 >
-
                   <p
                     className={
-                      transaction.status === "COMPLETED"
+                      transaction.status ===
+                      "COMPLETED"
                         ? "text-green-400"
                         : "text-yellow-400"
                     }
                   >
-
                     {transaction.status}
-
                   </p>
-
-
                 </div>
-
-
-
-
               </div>
-
-
             );
-
-
           })}
-
-
-
         </div>
-
-
       )}
-
-
-
     </section>
-
-
   );
-
 }

@@ -8,8 +8,8 @@ export default function LiveMarketOverview() {
   const { coins, loading, error } = useMarket();
 
   return (
-    <section className="bg-[#05070D] py-28">
-      <div className="mx-auto max-w-7xl px-8">
+    <section className="bg-[#05070D] py-16 sm:py-20 lg:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         <SectionTitle
           badge="LIVE MARKET"
@@ -24,7 +24,7 @@ export default function LiveMarketOverview() {
         )}
 
         {error && (
-          <div className="rounded-xl border border-red-500 bg-red-500/10 p-6 text-center text-red-400">
+          <div className="rounded-xl border border-red-500 bg-red-500/10 p-4 text-center text-sm text-red-400 sm:p-6 sm:text-base">
             {error}
           </div>
         )}

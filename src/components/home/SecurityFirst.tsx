@@ -36,8 +36,8 @@ export default function SecurityFirst() {
   ];
 
   return (
-    <section className="bg-[#050816] py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="bg-[#050816] py-16 sm:py-20 lg:py-32">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         <SectionTitle
           badge="SECURITY FIRST"
@@ -45,7 +45,7 @@ export default function SecurityFirst() {
           description="ColdWallet helps users build confidence through education, organization, and security-focused tools designed for responsible digital asset management."
         />
 
-        <div className="mt-20 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-12 grid gap-5 sm:mt-16 sm:gap-8 md:grid-cols-2 xl:mt-20 xl:grid-cols-4">
 
           {securityItems.map((item) => (
             <Card
@@ -63,14 +63,17 @@ export default function SecurityFirst() {
                 hover:shadow-[0_0_40px_rgba(37,99,235,.18)]
               "
             >
-              <CardContent className="p-8">
+              <CardContent className="p-5 sm:p-6 lg:p-8">
 
                 <div
                   className="
-                    mb-8
+                    mb-6
                     flex
-                    h-16
-                    w-16
+                    h-14
+                    w-14
+                    sm:mb-8
+                    sm:h-16
+                    sm:w-16
                     items-center
                     justify-center
                     rounded-2xl
@@ -84,11 +87,11 @@ export default function SecurityFirst() {
                   {item.icon}
                 </div>
 
-                <h3 className="mb-4 text-2xl font-semibold text-white">
+                <h3 className="mb-3 text-xl font-semibold text-white sm:mb-4 sm:text-2xl">
                   {item.title}
                 </h3>
 
-                <p className="leading-8 text-slate-400">
+                <p className="text-sm leading-7 text-slate-400 sm:text-base sm:leading-8">
                   {item.description}
                 </p>
 

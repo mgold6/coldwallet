@@ -170,6 +170,11 @@ const networks: NetworkSeed[] = [
     name: "Ethereum",
     code: "ETH",
   },
+  {
+    currencyCode: "ETH",
+    name: "Ethereum Sepolia",
+    code: "ETH_SEPOLIA",
+  },
 
   // USDT
   {

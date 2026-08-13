@@ -1,5 +1,17 @@
 interface WalletDepositsProps {
-  wallet: any;
+  wallet: {
+    currency: {
+      code: string;
+    };
+    deposits: Array<{
+      id: string;
+      amount: {
+        toString(): string;
+      };
+      createdAt: Date;
+      confirmed: boolean;
+    }>;
+  };
 }
 
 export default function WalletDeposits({
@@ -13,23 +25,28 @@ export default function WalletDeposits({
 
       {wallet.deposits?.length ? (
         <div className="space-y-4">
-          {wallet.deposits.map((deposit: any) => (
+          {wallet.deposits.map((deposit) => (
             <div
               key={deposit.id}
               className="flex items-center justify-between rounded-lg border border-slate-800 p-4"
             >
               <div>
                 <p className="font-semibold">
-                  {deposit.amount.toString()} {wallet.currency.code}
+                  {deposit.amount.toString()}{" "}
+                  {wallet.currency.code}
                 </p>
 
                 <p className="text-sm text-slate-400">
-                  {new Date(deposit.createdAt).toLocaleString()}
+                  {new Date(
+                    deposit.createdAt
+                  ).toLocaleString()}
                 </p>
               </div>
 
               <span>
-                {deposit.confirmed ? "✅ Confirmed" : "⏳ Pending"}
+                {deposit.confirmed
+                  ? "✅ Confirmed"
+                  : "⏳ Pending"}
               </span>
             </div>
           ))}

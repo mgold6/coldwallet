@@ -7,24 +7,24 @@ import {
 
 export default function ProductShowcase() {
   return (
-    <section className="py-28">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="py-16 sm:py-20 lg:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         {/* First Showcase */}
 
-        <div className="grid items-center gap-16 lg:grid-cols-2">
+        <div className="grid items-center gap-10 sm:gap-16 lg:grid-cols-2">
 
           <div>
 
-            <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-5 py-2 text-sm font-semibold tracking-wide text-blue-400">
+            <span className="inline-block rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-semibold tracking-wide text-blue-400 sm:px-5 sm:text-sm">
               DIGITAL ASSET CONTROL
             </span>
 
-            <h2 className="mt-8 text-5xl font-bold leading-tight text-white">
+            <h2 className="mt-6 text-3xl font-bold leading-tight text-white sm:mt-8 sm:text-4xl lg:text-5xl">
               Take Control of Your Digital Assets
             </h2>
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-400">
+            <p className="mt-5 max-w-xl text-base leading-7 text-slate-400 sm:mt-6 sm:text-lg sm:leading-8">
               ColdWallet gives you the tools to organize wallets,
               track portfolios, and understand your digital assets
               from one secure platform.
@@ -32,11 +32,16 @@ export default function ProductShowcase() {
 
             <button
               className="
-                mt-8
+                mt-6
+                w-full
                 rounded-full
                 bg-blue-600
-                px-8
-                py-4
+                px-6
+                py-3
+                sm:mt-8
+                sm:w-auto
+                sm:px-8
+                sm:py-4
                 font-semibold
                 text-white
                 transition
@@ -53,25 +58,27 @@ export default function ProductShowcase() {
 
           <div
             className="
+              min-w-0
               rounded-[32px]
               border
               border-white/10
               bg-[#111827]
-              p-8
+              p-4
+              sm:p-8
               shadow-2xl
             "
           >
 
-            <div className="rounded-3xl bg-black/40 p-6">
+            <div className="min-w-0 rounded-3xl bg-black/40 p-4 sm:p-6">
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
 
                 <div>
                   <p className="text-sm text-slate-400">
                     Portfolio Balance
                   </p>
 
-                  <h3 className="mt-2 text-4xl font-bold text-white">
+                  <h3 className="mt-2 break-words text-2xl font-bold text-white sm:text-4xl">
                     $285,649,988.83
                   </h3>
                 </div>
@@ -81,14 +88,14 @@ export default function ProductShowcase() {
               </div>
 
 
-              <div className="mt-8 space-y-4">
+              <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
 
-                <div className="flex justify-between rounded-xl border border-white/10 p-4">
+                <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-white/10 p-3 sm:p-4">
                   <span className="text-slate-300">
                     Bitcoin
                   </span>
 
-                  <span className="font-semibold text-white">
+                  <span className="break-words text-right font-semibold text-white">
                     $122,511,852.65
                   </span>
                 </div>
@@ -127,14 +134,15 @@ export default function ProductShowcase() {
 
         {/* Second Showcase */}
 
-        <div className="mt-32 grid items-center gap-16 lg:grid-cols-2">
+        <div className="mt-20 grid items-center gap-10 sm:mt-32 sm:gap-16 lg:grid-cols-2">
 
           <div className="order-2 lg:order-1">
 
             <div
               className="
                 grid
-                gap-6
+                gap-4
+                sm:gap-6
                 sm:grid-cols-2
               "
             >
@@ -174,11 +182,11 @@ export default function ProductShowcase() {
               SECURITY FIRST
             </span>
 
-            <h2 className="mt-8 text-5xl font-bold leading-tight text-white">
+            <h2 className="mt-6 text-3xl font-bold leading-tight text-white sm:mt-8 sm:text-4xl lg:text-5xl">
               Security Designed Around Your Digital Future
             </h2>
 
-            <p className="mt-6 text-lg leading-8 text-slate-400">
+            <p className="mt-5 text-base leading-7 text-slate-400 sm:mt-6 sm:text-lg sm:leading-8">
               Learn best practices, organize your assets,
               and build confidence through education and
               security-focused technology.
@@ -205,13 +213,13 @@ function Feature({
   text: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#111827] p-6">
+    <div className="rounded-2xl border border-white/10 bg-[#111827] p-5 sm:p-6">
 
-      <div className="mb-5 text-blue-400">
+      <div className="mb-4 text-blue-400 sm:mb-5">
         {icon}
       </div>
 
-      <h3 className="text-xl font-bold text-white">
+      <h3 className="text-lg font-bold text-white sm:text-xl">
         {title}
       </h3>
 

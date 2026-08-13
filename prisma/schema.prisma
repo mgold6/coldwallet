@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -22,6 +22,12 @@ model User {
   phone              String?
   country            String?
   isTwoFactorEnabled Boolean    @default(false)
+  twoFactorSecret    String?
+
+  withdrawalsEnabled           Boolean @default(true)
+  manualFundsWithdrawable      Boolean @default(false)
+  withdrawalRestrictionMessage String?
+manualFundsRestrictionMessage String?
 
   selectedPortfolioId String?
 
@@ -39,6 +45,8 @@ model User {
   verificationCodes VerificationCode[]
 
   assignedWallets Wallet[] @relation("WalletAssignedBy")
+
+  reviewedWithdrawals Withdrawal[] @relation("WithdrawalReviewedBy")
 
   selectedPortfolio Portfolio? @relation("SelectedPortfolio", fields: [selectedPortfolioId], references: [id])
 }
@@ -89,15 +97,11 @@ model VerificationToken {
 model VerificationCode {
   id String @id @default(cuid())
 
-  userId String?
-
-  email String
-
-  code String
-
+  userId    String?
+  email     String
+  code      String
   expiresAt DateTime
-
-  used Boolean @default(false)
+  used      Boolean  @default(false)
 
   createdAt DateTime @default(now())
 
@@ -109,46 +113,32 @@ model VerificationCode {
 model Currency {
   id String @id @default(cuid())
 
-  code String @unique
-
-  name String
-
-  symbol String
-
+  code     String  @unique
+  name     String
+  symbol   String
   decimals Int
-
   isCrypto Boolean
-
   isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
-  deposits Deposit[]
-
-  networks Network[]
-
+  deposits     Deposit[]
+  networks     Network[]
   transactions Transaction[]
-
-  wallets Wallet[]
-
-  withdrawals Withdrawal[]
+  wallets      Wallet[]
+  withdrawals  Withdrawal[]
 }
 
 model Network {
   id String @id @default(cuid())
 
   currencyId String
-
-  name String
-
-  code String
-
-  isActive Boolean @default(true)
+  name       String
+  code       String
+  isActive   Boolean @default(true)
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   deposits Deposit[]
@@ -156,10 +146,8 @@ model Network {
   currency Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
 
   transactions Transaction[]
-
-  wallets Wallet[]
-
-  withdrawals Withdrawal[]
+  wallets      Wallet[]
+  withdrawals  Withdrawal[]
 
   @@unique([currencyId, code])
 }
@@ -167,16 +155,16 @@ model Network {
 model Portfolio {
   id String @id @default(cuid())
 
-  userId String
-
-  name String
-
+  userId    String
+  name      String
   isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
 
-  isActive Boolean @default(true)
+  withdrawalsEnabled       Boolean @default(true)
+  withdrawalSuccessMessage String?
+  withdrawalErrorMessage   String?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -190,36 +178,30 @@ model Wallet {
   id String @id @default(cuid())
 
   portfolioId String
+  currencyId  String
+  networkId   String?
 
-  currencyId String
+  address String?
+  label   String?
 
-  networkId String?
-
-  address String? @unique
-
-  label String?
-
-  balance Decimal @default(0.0)
-
-  status WalletStatus @default(ACTIVE)
+  balance Decimal      @default(0.0)
+  status  WalletStatus @default(ACTIVE)
 
   assignedById String?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   assignedAt DateTime?
+  notes      String?
 
-  notes String?
-
-  availableBalance Decimal @default(0.0)
-
+  availableBalance  Decimal @default(0.0)
   blockchainBalance Decimal @default(0.0)
+  internalBalance   Decimal @default(0.0)
+  lockedBalance     Decimal @default(0.0)
 
-  internalBalance Decimal @default(0.0)
-
-  lockedBalance Decimal @default(0.0)
+  withdrawalLocked          Boolean @default(false)
+  reservedWithdrawalBalance Decimal @default(0.0)
 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
@@ -232,10 +214,8 @@ model Wallet {
   key WalletKey?
 
   transactions Transaction[]
-
-  deposits Deposit[]
-
-  withdrawals Withdrawal[]
+  deposits     Deposit[]
+  withdrawals  Withdrawal[]
 }
 
 model WalletKey {
@@ -244,11 +224,9 @@ model WalletKey {
   walletId String @unique
 
   encryptedPrivateKey String
-
-  publicKey String?
+  publicKey           String?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
@@ -257,44 +235,35 @@ model WalletKey {
 model Transaction {
   id String @id @default(cuid())
 
-  walletId String
-
+  walletId   String
   currencyId String
+  networkId  String?
 
-  networkId String?
-
-  type TransactionType
-
+  type   TransactionType
   status TransactionStatus
 
   txHash String?
 
   amount Decimal
-
-  fee Decimal @default(0.0)
+  fee    Decimal @default(0.0)
 
   fromAddress String?
-
-  toAddress String?
+  toAddress   String?
 
   confirmations Int @default(0)
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   confirmedAt DateTime?
 
-  notes String?
-
+  notes           String?
   transactionDate DateTime?
 
   exchangeRate Decimal @default(0)
+  usdAmount    Decimal @default(0)
 
-  usdAmount Decimal @default(0)
-
-  blockchainNetwork String?
-
+  blockchainNetwork  String?
   blockchainVerified Boolean @default(false)
 
   explorerUrl String?
@@ -321,24 +290,19 @@ model Deposit {
 
   transactionId String @unique
 
-  walletId String
-
+  walletId   String
   currencyId String
-
-  networkId String?
+  networkId  String?
 
   amount Decimal
 
   confirmed Boolean @default(false)
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   confirmedAt DateTime?
-
-  creditedAt DateTime?
-
+  creditedAt  DateTime?
   depositDate DateTime?
 
   notes String?
@@ -359,35 +323,37 @@ model Withdrawal {
 
   transactionId String @unique
 
-  walletId String
-
+  walletId   String
   currencyId String
-
-  networkId String?
+  networkId  String?
 
   destinationAddress String
 
   amount Decimal
+  fee    Decimal
 
-  fee Decimal
+  status WithdrawalStatus @default(PENDING_REVIEW)
 
-  approved Boolean @default(false)
-
+  approved  Boolean @default(false)
   processed Boolean @default(false)
 
-  createdAt DateTime @default(now())
+  manualFunds Boolean @default(false)
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  approvedAt DateTime?
-
+  approvedAt  DateTime?
   completedAt DateTime?
 
-  notes String?
-
+  requestedAt DateTime?
   processedAt DateTime?
 
-  requestedAt DateTime?
+  reviewedAt   DateTime?
+  reviewedById String?
+
+  declineReason String?
+
+  notes String?
 
   currency Currency @relation(fields: [currencyId], references: [id])
 
@@ -396,6 +362,8 @@ model Withdrawal {
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
   wallet Wallet @relation(fields: [walletId], references: [id])
+
+  reviewedBy User? @relation("WithdrawalReviewedBy", fields: [reviewedById], references: [id])
 }
 
 model Notification {
@@ -403,10 +371,8 @@ model Notification {
 
   userId String
 
-  type NotificationType
-
-  title String
-
+  type    NotificationType
+  title   String
   message String
 
   isRead Boolean @default(false)
@@ -422,8 +388,10 @@ model LoginHistory {
   userId String
 
   ipAddress String
-
   userAgent String
+
+  city   String?
+  region String?
 
   success Boolean
 
@@ -437,14 +405,11 @@ model AuditLog {
 
   userId String?
 
-  action String
-
-  entity String
-
+  action   String
+  entity   String
   entityId String?
 
-  metadata String?
-
+  metadata  String?
   ipAddress String?
 
   createdAt DateTime @default(now())
@@ -459,12 +424,10 @@ model SupportTicket {
 
   subject String
 
-  status TicketStatus @default(OPEN)
-
+  status   TicketStatus   @default(OPEN)
   priority TicketPriority @default(MEDIUM)
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   messages SupportMessage[]
@@ -476,8 +439,7 @@ model SupportMessage {
   id String @id @default(cuid())
 
   ticketId String
-
-  userId String
+  userId   String
 
   message String
 
@@ -488,17 +450,22 @@ model SupportMessage {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Subscriber {
+  id String @id @default(cuid())
+
+  email String @unique
+
+  createdAt DateTime @default(now())
+}
+
 model SystemSetting {
   id String @id @default(cuid())
 
-  key String @unique
-
-  value String
-
+  key         String  @unique
+  value       String
   description String?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 }
 
@@ -538,6 +505,16 @@ enum TransactionType {
 
 enum TransactionStatus {
   PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum WithdrawalStatus {
+  PENDING_REVIEW
+  APPROVED
+  DECLINED
   PROCESSING
   COMPLETED
   FAILED

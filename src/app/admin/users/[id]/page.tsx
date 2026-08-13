@@ -6,6 +6,7 @@ import { dashboardService } from "@/server/services/dashboard.service";
 
 import UserEditForm from "./components/UserEditForm";
 import PortfolioManager from "./components/PortfolioManager";
+import FinancialControls from "./components/FinancialControls";
 
 
 interface UserDetailsPageProps {
@@ -287,9 +288,10 @@ export default async function UserDetailsPage({
 
 
 
-      {/* User Management */}
 
-      <UserEditForm
+
+
+  <UserEditForm
         user={{
           id: user.id,
           role: user.role,

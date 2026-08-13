@@ -1,4 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
+import CryptoTicker from "@/components/market/CryptoTicker";
 
 export default function PublicLayout({
   children,
@@ -7,6 +8,8 @@ export default function PublicLayout({
 }) {
   return (
     <>
+      <CryptoTicker />
+
       <Navbar />
 
       {children}

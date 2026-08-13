@@ -1,4 +1,7 @@
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import NextAuth, {
+  DefaultSession,
+  DefaultUser,
+} from "next-auth";
 import { DefaultJWT } from "next-auth/jwt";
 
 declare module "next-auth" {
@@ -6,12 +9,14 @@ declare module "next-auth" {
     user: {
       id: string;
       role: "USER" | "ADMIN";
+      isTwoFactorEnabled: boolean;
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     id: string;
     role: "USER" | "ADMIN";
+    isTwoFactorEnabled: boolean;
   }
 }
 
@@ -19,5 +24,6 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
     role: "USER" | "ADMIN";
+    isTwoFactorEnabled: boolean;
   }
 }

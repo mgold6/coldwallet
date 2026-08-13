@@ -79,15 +79,6 @@ export default function AssignWalletDialog({
 
   const [walletType, setWalletType] =
     useState("existing");
-    const generatedSupportedCurrencies = [
-  "BTC",
-  "ETH",
-  "SOL",
-  "XRP",
-  "BNB",
-  "AVAX",
-  "USDT",
-];
 
 
   const [portfolioId, setPortfolioId] =
@@ -118,12 +109,6 @@ export default function AssignWalletDialog({
 );
 
 
-const canGenerate =
-  selectedCurrency
-    ? generatedSupportedCurrencies.includes(
-        selectedCurrency.code
-      )
-    : false;
 
 
   const networks =
@@ -223,93 +208,6 @@ const canGenerate =
     }
 
 
-async function handleAssignAll() {
-
-  if (!portfolioId) {
-
-    toast.error(
-      "Please select a portfolio."
-    );
-
-    return;
-
-  }
-
-if (
-  walletType === "generated" &&
-  selectedCurrency &&
-  !canGenerate
-) {
-
-  toast.error(
-    `${selectedCurrency.code} does not support automatic wallet generation yet.`
-  );
-
-  return;
-
-}
-  setSubmitting(true);
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/admin/wallets/assign-all",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            portfolioId,
-          }),
-        }
-      );
-
-    const json =
-      await response.json();
-
-    if (!response.ok || !json.success) {
-
-      toast.error(
-        json.message ??
-        "Unable to assign wallets."
-      );
-
-      return;
-
-    }
-console.log("Assign All Response:", json);
-
-    const createdCount =
-  Number(json.created ?? 0);
-
-const skippedCount =
-  Number(json.skipped ?? 0);
-
-toast.success(
-  `Created ${createdCount} wallet(s). Skipped ${skippedCount}.`
-);
-
-    setOpen(false);
-
-    router.refresh();
-
-  } catch (error) {
-
-    console.error(error);
-
-    toast.error(
-      "Failed to assign wallets."
-    );
-
-  } finally {
-
-    setSubmitting(false);
-
-  }
-
-}
     setSubmitting(true);
 
 

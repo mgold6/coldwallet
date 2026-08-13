@@ -108,7 +108,7 @@ export class WithdrawalRepository {
   async approvedCount() {
     return prisma.withdrawal.count({
       where: {
-        approved: true,
+        status: "APPROVED",
       },
     });
   }
@@ -116,7 +116,15 @@ export class WithdrawalRepository {
   async pendingCount() {
     return prisma.withdrawal.count({
       where: {
-        approved: false,
+        status: "PENDING_REVIEW",
+      },
+    });
+  }
+
+  async declinedCount() {
+    return prisma.withdrawal.count({
+      where: {
+        status: "DECLINED",
       },
     });
   }
@@ -124,7 +132,7 @@ export class WithdrawalRepository {
   async processedCount() {
     return prisma.withdrawal.count({
       where: {
-        processed: true,
+        status: "COMPLETED",
       },
     });
   }

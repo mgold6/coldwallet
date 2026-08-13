@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   }
 
   const userId =
-    (session.user as any).id;
+    (session.user as { id: string }).id;
 
   const [
     markets,
@@ -156,16 +156,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">
-          Dashboard
-        </h1>
-
-        <p className="mt-2 text-slate-400">
-          Welcome back. Here's an overview of your digital assets.
-        </p>
-      </div>
-
       <div
         className="
           rounded-3xl
@@ -213,9 +203,7 @@ export default async function DashboardPage() {
           {totalChange >= 0
             ? "+"
             : "-"}
-
           $
-
           {Math.abs(
             totalChange
           ).toLocaleString(
@@ -225,9 +213,7 @@ export default async function DashboardPage() {
               maximumFractionDigits: 2,
             }
           )}
-
           {" "}
-
           (
           {totalChangePercentage >= 0
             ? "+"

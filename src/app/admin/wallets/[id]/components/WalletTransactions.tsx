@@ -1,5 +1,18 @@
 interface WalletTransactionsProps {
-  wallet: any;
+  wallet: {
+    currency: {
+      code: string;
+    };
+    transactions: Array<{
+      id: string;
+      type: string;
+      createdAt: Date;
+      amount: {
+        toString(): string;
+      };
+      status: string;
+    }>;
+  };
 }
 
 export default function WalletTransactions({
@@ -13,7 +26,7 @@ export default function WalletTransactions({
 
       {wallet.transactions?.length ? (
         <div className="space-y-4">
-          {wallet.transactions.map((transaction: any) => (
+          {wallet.transactions.map((transaction) => (
             <div
               key={transaction.id}
               className="flex items-center justify-between rounded-lg border border-slate-800 p-4"
@@ -24,13 +37,16 @@ export default function WalletTransactions({
                 </p>
 
                 <p className="text-sm text-slate-400">
-                  {new Date(transaction.createdAt).toLocaleString()}
+                  {new Date(
+                    transaction.createdAt
+                  ).toLocaleString()}
                 </p>
               </div>
 
               <div className="text-right">
                 <p>
-                  {transaction.amount.toString()} {wallet.currency.code}
+                  {transaction.amount.toString()}{" "}
+                  {wallet.currency.code}
                 </p>
 
                 <p className="text-sm text-slate-400">

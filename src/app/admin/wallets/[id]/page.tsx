@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Decimal } from "@prisma/client/runtime/library";
 
 import prisma from "@/lib/prisma";
 
@@ -8,89 +9,62 @@ import WalletDeposits from "./components/WalletDeposits";
 import WalletWithdrawals from "./components/WalletWithdrawals";
 import WalletTransactions from "./components/WalletTransactions";
 
-
 interface WalletPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-
-
 export default async function WalletPage({
   params,
 }: WalletPageProps) {
-
-
   const { id } = await params;
-
-
 
   const wallet =
     await prisma.wallet.findUnique({
-
       where: {
         id,
       },
 
       include: {
-
         currency: true,
 
         network: true,
 
-
         deposits: {
-
           orderBy: {
             createdAt: "desc",
           },
-
         },
-
 
         transactions: {
+  orderBy: {
+    createdAt: "desc",
+  },
+},
 
-          orderBy: {
-            createdAt: "desc",
-          },
+withdrawals: {
+  orderBy: {
+    createdAt: "desc",
+  },
+},
 
-        },
-
-
-        portfolio: {
-
+portfolio: {
           include: {
-
             user: true,
-
           },
-
         },
-
-
       },
-
     });
 
-
-
   if (!wallet) {
-
     notFound();
-
   }
 
-
-
-
-
-
   const formatBalance = (
-    value: unknown
+    value: Decimal
   ) => {
-
-    return Number(value ?? 0)
+    return Number(value)
       .toLocaleString(
         undefined,
         {
@@ -98,20 +72,10 @@ export default async function WalletPage({
           maximumFractionDigits: 8,
         }
       );
-
   };
 
-
-
-
-
-
-
   const overview = (
-
     <div className="space-y-6">
-
-
       <div
         className="
           rounded-xl
@@ -121,11 +85,9 @@ export default async function WalletPage({
           p-6
         "
       >
-
         <h2 className="text-xl font-semibold text-white">
           Wallet Overview
         </h2>
-
 
         <div
           className="
@@ -136,10 +98,7 @@ export default async function WalletPage({
             md:grid-cols-2
           "
         >
-
-
           <div>
-
             <p className="text-sm text-slate-400">
               Wallet Address
             </p>
@@ -156,14 +115,9 @@ export default async function WalletPage({
             >
               {wallet.address}
             </p>
-
           </div>
 
-
-
-
           <div>
-
             <p className="text-sm text-slate-400">
               Currency
             </p>
@@ -171,37 +125,22 @@ export default async function WalletPage({
             <p className="mt-2 text-white">
               {wallet.currency.code}
             </p>
-
           </div>
 
-
-
-
           <div>
-
             <p className="text-sm text-slate-400">
               Available Balance
             </p>
 
             <p className="mt-2 text-white">
-
               {formatBalance(
                 wallet.availableBalance
-              )}
-
-              {" "}
-
+              )}{" "}
               {wallet.currency.code}
-
             </p>
-
           </div>
 
-
-
-
           <div>
-
             <p className="text-sm text-slate-400">
               Network
             </p>
@@ -209,33 +148,14 @@ export default async function WalletPage({
             <p className="mt-2 text-white">
               {wallet.network?.name ?? "—"}
             </p>
-
           </div>
-
-
         </div>
-
-
       </div>
-
-
     </div>
-
   );
 
-
-
-
-
-
-
-
   return (
-
     <div className="space-y-8 p-8">
-
-
-
       <div
         className="
           grid
@@ -244,8 +164,6 @@ export default async function WalletPage({
           lg:grid-cols-2
         "
       >
-
-
         <section
           className="
             rounded-2xl
@@ -255,20 +173,14 @@ export default async function WalletPage({
             p-6
           "
         >
-
           <h1 className="text-2xl font-bold text-white">
             Wallet Details
           </h1>
 
-
-
           <div className="mt-6">
-
-
             <p className="text-sm text-slate-400">
               Total Balance
             </p>
-
 
             <p
               className="
@@ -278,23 +190,12 @@ export default async function WalletPage({
                 text-white
               "
             >
-
               {formatBalance(
                 wallet.balance
-              )}
-
-              {" "}
-
+              )}{" "}
               {wallet.currency.code}
-
             </p>
-
-
           </div>
-
-
-
-
 
           <div
             className="
@@ -304,11 +205,9 @@ export default async function WalletPage({
               p-5
             "
           >
-
             <h2 className="mb-5 font-semibold text-white">
               Balance Breakdown
             </h2>
-
 
             <div
               className="
@@ -318,50 +217,52 @@ export default async function WalletPage({
                 md:grid-cols-2
               "
             >
-
               <Balance
                 title="Available Balance"
-                value={wallet.availableBalance}
-                currency={wallet.currency.code}
+                value={
+                  wallet.availableBalance
+                }
+                currency={
+                  wallet.currency.code
+                }
                 format={formatBalance}
               />
-
 
               <Balance
                 title="Blockchain Balance"
-                value={wallet.blockchainBalance}
-                currency={wallet.currency.code}
+                value={
+                  wallet.blockchainBalance
+                }
+                currency={
+                  wallet.currency.code
+                }
                 format={formatBalance}
               />
-
 
               <Balance
                 title="Internal Balance"
-                value={wallet.internalBalance}
-                currency={wallet.currency.code}
+                value={
+                  wallet.internalBalance
+                }
+                currency={
+                  wallet.currency.code
+                }
                 format={formatBalance}
               />
-
 
               <Balance
                 title="Locked Balance"
-                value={wallet.lockedBalance}
-                currency={wallet.currency.code}
+                value={
+                  wallet.lockedBalance
+                }
+                currency={
+                  wallet.currency.code
+                }
                 format={formatBalance}
               />
-
             </div>
-
-
           </div>
-
-
         </section>
-
-
-
-
-
 
         <section
           className="
@@ -372,149 +273,100 @@ export default async function WalletPage({
             p-6
           "
         >
-
           <h2 className="text-xl font-semibold text-white">
             User Information
           </h2>
 
-
           <div className="mt-6 space-y-5">
-
-
             <Info
               title="Email"
-              value={wallet.portfolio.user.email}
+              value={
+                wallet.portfolio.user.email
+              }
             />
-
 
             <Info
               title="Portfolio"
               value="Main Portfolio"
             />
 
-
             <Info
               title="Status"
-              value={wallet.portfolio.user.status}
+              value={
+                wallet.portfolio.user.status
+              }
             />
-
 
             <Info
               title="Role"
-              value={wallet.portfolio.user.role}
+              value={
+                wallet.portfolio.user.role
+              }
             />
-
-
           </div>
-
-
         </section>
-
-
       </div>
-
-
-
-
-
-
 
       <WalletFinancialOperations
         walletId={wallet.id}
       />
 
-
-
-
-
-
-
       <WalletTabs
-
         overview={overview}
-
         deposits={
           <WalletDeposits
             wallet={wallet}
           />
         }
-
-
         withdrawals={
           <WalletWithdrawals
             wallet={wallet}
           />
         }
-
-
         transactions={
           <WalletTransactions
             wallet={wallet}
           />
         }
-
       />
-
-
-
     </div>
-
   );
-
 }
-
-
-
-
 
 function Balance({
   title,
   value,
   currency,
   format,
-}: any) {
-
+}: {
+  title: string;
+  value: Decimal;
+  currency: string;
+  format: (value: Decimal) => string;
+}) {
   return (
-
     <div>
-
       <p className="text-sm text-slate-400">
         {title}
       </p>
 
-
       <p className="mt-1 break-all text-white">
-
-        {format(value)}
-
-        {" "}
-
+        {format(value)}{" "}
         {currency}
-
       </p>
-
     </div>
-
   );
-
 }
-
-
-
-
 
 function Info({
   title,
   value,
 }: {
-  title:string;
-  value:string;
+  title: string;
+  value: string;
 }) {
-
   return (
-
     <div>
-
       <p className="text-sm text-slate-400">
         {title}
       </p>
@@ -522,9 +374,6 @@ function Info({
       <p className="mt-1 text-white">
         {value}
       </p>
-
     </div>
-
   );
-
 }

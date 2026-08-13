@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+
+import { requireAdmin } from "@/lib/admin-auth";
 import { depositService } from "@/server/services/deposit.service";
 
 export async function GET() {
   try {
+    const { response } = await requireAdmin();
+
+    if (response) {
+      return response;
+    }
+
     const deposits = await depositService.getDeposits();
     const stats = await depositService.getStats();
 

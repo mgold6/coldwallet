@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { financialService } from "@/server/services/financial.service";
 
-
 export async function POST(req: Request) {
-
   try {
+    const { response } = await requireAdmin();
+
+    if (response) {
+      return response;
+    }
 
     const body = await req.json();
-
 
     const {
       action,
@@ -16,23 +19,18 @@ export async function POST(req: Request) {
       amount,
       notes,
       destinationAddress,
-
       transactionSource,
       balanceEffect,
       showInHistory,
       sendNotification,
-
+      sendEmailNotification,
       txHash,
       blockchainNetwork,
       explorerUrl,
       blockchainVerified,
-
     } = body;
 
-
-
     if (!walletId) {
-
       return NextResponse.json(
         {
           success: false,
@@ -42,168 +40,93 @@ export async function POST(req: Request) {
           status: 400,
         }
       );
-
     }
-
-
 
     const normalizedAction =
       String(action).toUpperCase();
 
-
-
     let result;
 
-
-
     if (normalizedAction === "DEPOSIT") {
-
-
       result =
         await financialService.manualDeposit({
-
           walletId,
-
-          usdAmount:
-            Number(amount),
-
+          usdAmount: Number(amount),
           notes,
-
           transactionSource,
-
           balanceEffect,
-
           showInHistory,
-
           sendNotification,
-
+          sendEmailNotification,
           txHash,
-
           blockchainNetwork,
-
           explorerUrl,
-
           blockchainVerified,
-
         });
-
-
-    }
-
-
-    else if (normalizedAction === "WITHDRAWAL") {
-
-
+    } else if (
+      normalizedAction === "WITHDRAWAL"
+    ) {
       result =
         await financialService.manualWithdrawal({
-
           walletId,
-
-          amount:
-            Number(amount),
-
+          amount: Number(amount),
           destinationAddress,
-
           notes,
-
           transactionSource,
-
           balanceEffect,
-
           showInHistory,
-
           sendNotification,
-
           txHash,
-
           blockchainNetwork,
-
           explorerUrl,
-
           blockchainVerified,
-
         });
-
-
-    }
-
-
-    else if (normalizedAction === "ADJUSTMENT") {
-
-
+    } else if (
+      normalizedAction === "ADJUSTMENT"
+    ) {
       result =
         await financialService.adjustBalance({
-
           walletId,
-
-          amount:
-            Number(amount),
-
+          amount: Number(amount),
           notes,
-
           transactionSource,
-
           balanceEffect,
-
           showInHistory,
-
           sendNotification,
-
         });
-
-
-    }
-
-
-    else {
-
+    } else {
       return NextResponse.json(
         {
-          success:false,
-          message:"Invalid financial action.",
+          success: false,
+          message: "Invalid financial action.",
         },
         {
-          status:400,
+          status: 400,
         }
       );
-
     }
 
-
-
     return NextResponse.json({
-
-      success:true,
-
-      transaction:result,
-
+      success: true,
+      transaction: result,
     });
-
-
-
-  } catch(error) {
-
-
+  } catch (error) {
     console.error(
       "Financial operation error:",
       error
     );
 
-
     return NextResponse.json(
       {
-        success:false,
-
+        success: false,
         message:
           error instanceof Error
             ? error.message
             : "Something went wrong.",
       },
       {
-        status:500,
+        status: 500,
       }
     );
-
   }
-
 }

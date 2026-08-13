@@ -1,152 +1,85 @@
 import {
   Prisma,
-  TransactionType,
   TransactionStatus,
+  TransactionType,
+  WithdrawalStatus,
 } from "@prisma/client";
+
+import prisma from "@/lib/prisma";
 
 import { transactionRepository } from "../repositories/transaction.repository";
 
-import prisma from "@/lib/prisma";
 import { marketService } from "@/server/services/market.service";
 import { systemSettingService } from "@/server/services/system-setting.service";
 
-
 export class TransactionService {
-
-
   async getAllTransactions() {
-
     return transactionRepository.list();
-
   }
 
-
-
-
-
-  async getTransactionById(
-    id: string
-  ) {
-
+  async getTransactionById(id: string) {
     return transactionRepository.findById(id);
-
   }
-
-
-
-
 
   async getUserTransactionById(
     id: string,
     userId: string
   ) {
-
     return transactionRepository.findByIdForUser(
       id,
       userId
     );
-
   }
-
-
-
-
 
   async getPendingTransactions() {
-
     return transactionRepository.findPending();
-
   }
-
-
-
-
 
   async getWalletTransactions(
     walletId: string
   ) {
-
     return transactionRepository.findByWallet(
       walletId
     );
-
   }
 
-
-
-
-
-  async getUserTransactions(
-    userId: string
-  ) {
-
+  async getUserTransactions(userId: string) {
     return prisma.transaction.findMany({
+      where: {
+        showInHistory: true,
 
-  where: {
-
-    showInHistory: true,
-
-    wallet: {
-
-      portfolio: {
-
-        userId,
-
+        wallet: {
+          portfolio: {
+            userId,
+          },
+        },
       },
 
-    },
-
-  },
-
       include: {
-
         currency: true,
-
         wallet: true,
-
         network: true,
-
       },
 
       orderBy: {
-
         createdAt: "desc",
-
       },
 
       take: 10,
-
     });
-
   }
 
-
-
-
-
-
   async createSwap({
-
     fromWalletId,
-
     toWalletId,
-
     amount,
-
   }: {
-
     fromWalletId: string;
-
     toWalletId: string;
-
     amount: string;
-
   }) {
-
-
     const fromWallet =
       await prisma.wallet.findUnique({
-
         where: {
           id: fromWalletId,
         },
@@ -154,14 +87,10 @@ export class TransactionService {
         include: {
           currency: true,
         },
-
       });
-
-
 
     const toWallet =
       await prisma.wallet.findUnique({
-
         where: {
           id: toWalletId,
         },
@@ -169,474 +98,556 @@ export class TransactionService {
         include: {
           currency: true,
         },
-
       });
 
-
-
-
     if (!fromWallet || !toWallet) {
-
       throw new Error(
         "Wallet not found."
       );
-
     }
-
-
-
-
 
     const swapAmount =
       new Prisma.Decimal(amount);
 
-
-
-
     if (
       swapAmount.lessThanOrEqualTo(0)
     ) {
-
       throw new Error(
         "Amount must be greater than zero."
       );
-
     }
-
-
-
-
 
     if (
       fromWallet.availableBalance.lessThan(
         swapAmount
       )
     ) {
-
       throw new Error(
         "Insufficient balance."
       );
-
     }
 
-
-
-
-
     await prisma.wallet.update({
-
       where: {
         id: fromWallet.id,
       },
 
       data: {
-
         availableBalance:
           fromWallet.availableBalance.minus(
             swapAmount
           ),
-
       },
-
     });
 
-
-
-
-
     return transactionRepository.create({
-
       wallet: {
-
         connect: {
           id: fromWallet.id,
         },
-
       },
 
-
       currency: {
-
         connect: {
           id: fromWallet.currencyId,
         },
-
       },
-
 
       type:
         TransactionType.INTERNAL,
 
-
       status:
         TransactionStatus.PENDING,
-
 
       amount:
         swapAmount,
 
-
       fee:
         new Prisma.Decimal(0),
-
 
       fromAddress:
         fromWallet.address,
 
-
       toAddress:
         toWallet.address,
 
-
       notes:
         `Swap ${fromWallet.currency.code} to ${toWallet.currency.code}`,
-
     });
-
-
   }
 
-
-
-
-
-
-
-
-
+  /**
+   * Creates a withdrawal request.
+   *
+   * IMPORTANT:
+   *
+   * 1. The user-facing amount is USD.
+   * 2. The USD amount is converted to cryptocurrency.
+   * 3. Market data is retrieved BEFORE the database transaction.
+   * 4. The withdrawal is created as PENDING\_REVIEW.
+   * 5. The user's permanent balance is NOT deducted here.
+   * 6. The requested amount is reserved while Admin reviews it.
+   * 7. Admin approval/decline happens elsewhere.
+   * 8. Processing is responsible for the final balance deduction.
+   */
   async createWithdrawal({
-
     walletId,
-
-    amount,
-
+    usdAmount,
     toAddress,
-
   }: {
-
     walletId: string;
-
-    amount: string;
-
+    usdAmount: string;
     toAddress: string;
-
   }) {
+    const requestedUsd =
+      new Prisma.Decimal(usdAmount);
 
-
-
-    const wallet =
-      await prisma.wallet.findUnique({
-
-        where: {
-          id: walletId,
-        },
-
-        include: {
-
-          currency: true,
-
-          network: true,
-
-        },
-
-      });
-
-
-
-
-
-    if (!wallet) {
-
-      throw new Error(
-        "Wallet not found."
-      );
-
-    }
-
-
-
-
-
-    const sendAmount =
-      new Prisma.Decimal(amount);
-
-
-
-
-
-    if (
-      sendAmount.lessThanOrEqualTo(0)
-    ) {
-
+    if (requestedUsd.lessThanOrEqualTo(0)) {
       throw new Error(
         "Amount must be greater than zero."
       );
-
     }
 
+    const trimmedAddress =
+      toAddress?.trim();
+
+    if (!trimmedAddress) {
+      throw new Error(
+        "Recipient address is required."
+      );
+    }
+
+    /*
+     * Read configurable settings before the database
+     * transaction. This keeps settings lookups outside
+     * the interactive Prisma transaction.
+     */
+    const [
+      withdrawalLockedMessage,
+      lockedBalanceMessage,
+      manualFundsWithdrawable,
+      manualFundsMessage,
+      insufficientBalanceMessage,
+    ] = await Promise.all([
+      systemSettingService.getValue(
+        "message_withdrawal_locked",
+        "Your balance is currently locked and cannot be withdrawn at this time. Please contact support."
+      ),
+      systemSettingService.getValue(
+        "message_locked_balance",
+        "Part of your balance is currently locked and cannot be withdrawn at this time. Please contact support."
+      ),
+      systemSettingService.getValue(
+        "manual_funds_withdrawable",
+        "false"
+      ),
+      systemSettingService.getValue(
+        "message_manual_funds_not_withdrawable",
+        "This balance is currently unavailable for withdrawal. Please contact support."
+      ),
+      systemSettingService.getValue(
+        "withdrawal_insufficient_balance",
+        "Your withdrawal request cannot be completed at this time. Please contact support."
+      ),
+    ]);
 
 
+    /*
+     * Get the wallet currency before the transaction.
+     * Market lookup must never happen inside the Prisma
+     * interactive transaction.
+     */
+    const walletForMarket =
+      await prisma.wallet.findUnique({
+        where: {
+          id: walletId,
+        },
+        select: {
+          id: true,
+          currency: {
+            select: {
+              code: true,
+            },
+          },
+          portfolio: {
+            select: {
+              withdrawalsEnabled: true,
+              withdrawalSuccessMessage: true,
+              withdrawalErrorMessage: true,
+              user: {
+                select: {
+                  withdrawalsEnabled: true,
+                  manualFundsWithdrawable: true,
+                  withdrawalRestrictionMessage: true,
+                  manualFundsRestrictionMessage: true,
+                },
+              },
+            },
+          },
+        },
+      });
 
-
-   if (
-  wallet.availableBalance.lessThan(
-    sendAmount
-  )
-) {
-
-  const message =
-    await systemSettingService.getValue(
-      "withdrawal_insufficient_balance",
-      "Your withdrawal request cannot be completed at this time. Please contact support."
-    );
-
-
-  throw new Error(message);
-
-}
-
-
-
-
+    if (!walletForMarket) {
+      throw new Error(
+        "Wallet not found."
+      );
+    }
 
     const markets =
       await marketService.getMarkets();
 
-
-
-
-
-    const market =
+    const walletMarket =
       markets.find(
         (coin) =>
           coin.symbol.toLowerCase() ===
-          wallet.currency.code.toLowerCase()
+          walletForMarket.currency.code.toLowerCase()
       );
 
-
-
-
-
-    if (!market) {
-
+    if (!walletMarket) {
       throw new Error(
         "Unable to get crypto price."
       );
-
     }
 
-
-
-
-
-    const usdAmount =
-      sendAmount.mul(
-        new Prisma.Decimal(
-          market.current_price
-        )
+    const exchangeRate =
+      new Prisma.Decimal(
+        walletMarket.current_price
       );
 
+    if (exchangeRate.lessThanOrEqualTo(0)) {
+      throw new Error(
+        "Unable to determine a valid crypto price."
+      );
+    }
 
+    const cryptoAmount =
+      requestedUsd.dividedBy(exchangeRate);
 
+    if (cryptoAmount.lessThanOrEqualTo(0)) {
+      throw new Error(
+        "Withdrawal amount must be greater than zero."
+      );
+    }
 
+    const globalManualFundsEnabled = [
+      "true",
+      "1",
+      "yes",
+      "on",
+      "enabled",
+    ].includes(
+      String(manualFundsWithdrawable)
+        .trim()
+        .toLowerCase()
+    );
 
-
-    const transaction =
-      await transactionRepository.create({
-
-        wallet: {
-
-          connect: {
-            id: wallet.id,
-          },
-
-        },
-
-
-        currency: {
-
-          connect: {
-            id: wallet.currencyId,
-          },
-
-        },
-
-
-        ...(wallet.networkId
-          ? {
-
-              network: {
-
-                connect: {
-                  id: wallet.networkId,
+    /*
+     * Only short database operations occur inside this
+     * transaction. No external market or settings calls
+     * occur here.
+     */
+    return prisma.$transaction(
+      async (tx) => {
+        const wallet =
+          await tx.wallet.findUnique({
+            where: {
+              id: walletId,
+            },
+            include: {
+              currency: true,
+              network: true,
+              portfolio: {
+                include: {
+                  user: {
+                    select: {
+                      withdrawalsEnabled: true,
+                      manualFundsWithdrawable: true,
+                      withdrawalRestrictionMessage: true,
+                      manualFundsRestrictionMessage: true,
+                    },
+                  },
                 },
-
               },
+            },
+          });
 
-            }
+        if (!wallet) {
+          throw new Error(
+            "Wallet not found."
+          );
+        }
 
-          : {}),
+        const userControls =
+          wallet.portfolio.user;
 
+        /*
+         * Withdrawal authorization is controlled only by:
+         *
+         * 1. Individual user switch
+         * 2. Portfolio switch
+         *
+         * The global/master withdrawal switch is intentionally
+         * not used here.
+         */
+        if (!userControls.withdrawalsEnabled) {
+          throw new Error(
+            userControls.withdrawalRestrictionMessage?.trim() ||
+              "Withdrawals are currently unavailable for your account."
+          );
+        }
 
+        if (!wallet.portfolio.withdrawalsEnabled) {
+          throw new Error(
+            wallet.portfolio.withdrawalErrorMessage?.trim() ||
+              "Withdrawals are currently unavailable for this portfolio."
+          );
+        }
 
-        type:
-          TransactionType.WITHDRAWAL,
+        const manualFundsEnabled =
+          globalManualFundsEnabled &&
+          userControls.manualFundsWithdrawable;
 
+        if (wallet.withdrawalLocked) {
+          throw new Error(
+            withdrawalLockedMessage
+          );
+        }
 
-        status:
-          TransactionStatus.COMPLETED,
+        if (
+          wallet.lockedBalance.greaterThan(0) &&
+          wallet.availableBalance.lessThan(
+            cryptoAmount
+          )
+        ) {
+          throw new Error(
+            lockedBalanceMessage
+          );
+        }
 
-
-        amount:
-          sendAmount,
-
-
-        usdAmount,
-
-
-        exchangeRate:
+        const internalFunds =
           new Prisma.Decimal(
-            market.current_price
-          ),
+            wallet.internalBalance ?? 0
+          );
 
+        const blockchainFunds =
+          new Prisma.Decimal(
+            wallet.blockchainBalance ?? 0
+          );
 
+        let internalPortion =
+          new Prisma.Decimal(0);
 
-        fee:
-          new Prisma.Decimal(0),
+        let blockchainPortion =
+          cryptoAmount;
 
+        if (manualFundsEnabled) {
+          internalPortion =
+            Prisma.Decimal.min(
+              internalFunds,
+              cryptoAmount
+            );
 
+          blockchainPortion =
+            cryptoAmount.minus(
+              internalPortion
+            );
+        }
 
-        fromAddress:
-          wallet.address,
+        if (
+          !manualFundsEnabled &&
+          cryptoAmount.greaterThan(
+            blockchainFunds
+          )
+        ) {
+          throw new Error(
+            userControls.manualFundsRestrictionMessage?.trim() ||
+              manualFundsMessage
+          );
+        }
 
+        if (
+          blockchainPortion.greaterThan(
+            blockchainFunds
+          )
+        ) {
+          throw new Error(
+            insufficientBalanceMessage
+          );
+        }
 
+        /*
+         * Existing pending withdrawals have already reduced
+         * availableBalance. Do not subtract the reserved
+         * amount a second time.
+         */
+        if (
+          wallet.availableBalance.lessThan(
+            cryptoAmount
+          )
+        ) {
+          throw new Error(
+            insufficientBalanceMessage
+          );
+        }
 
-        toAddress,
+        /*
+         * Atomically reserve the requested amount.
+         * Permanent wallet balances are not deducted here.
+         */
+        const reservation =
+          await tx.wallet.updateMany({
+            where: {
+              id: wallet.id,
+              availableBalance: {
+                gte: cryptoAmount,
+              },
+            },
+            data: {
+              availableBalance: {
+                decrement: cryptoAmount,
+              },
+              reservedWithdrawalBalance: {
+                increment: cryptoAmount,
+              },
+            },
+          });
 
+        if (reservation.count !== 1) {
+          throw new Error(
+            insufficientBalanceMessage
+          );
+        }
 
+        const transaction =
+          await tx.transaction.create({
+            data: {
+              walletId:
+                wallet.id,
+              currencyId:
+                wallet.currencyId,
+              ...(wallet.networkId
+                ? {
+                    networkId:
+                      wallet.networkId,
+                  }
+                : {}),
+              type:
+                TransactionType.WITHDRAWAL,
+              status:
+                TransactionStatus.PENDING,
+              amount:
+                cryptoAmount,
+              usdAmount:
+                requestedUsd,
+              exchangeRate,
+              fee:
+                new Prisma.Decimal(0),
+              fromAddress:
+                wallet.address,
+              toAddress:
+                trimmedAddress,
+              transactionDate:
+                new Date(),
+              notes:
+                "Withdrawal awaiting administrator review.",
+            },
+          });
 
-        confirmedAt:
-          new Date(),
+        const withdrawal =
+          await tx.withdrawal.create({
+            data: {
+              transactionId:
+                transaction.id,
+              walletId:
+                wallet.id,
+              currencyId:
+                wallet.currencyId,
+              networkId:
+                wallet.networkId,
+              destinationAddress:
+                trimmedAddress,
+              amount:
+                cryptoAmount,
+              fee:
+                new Prisma.Decimal(0),
+              status:
+                WithdrawalStatus.PENDING_REVIEW,
+              approved:
+                false,
+              processed:
+                false,
+              manualFunds:
+                internalPortion.greaterThan(0),
+              requestedAt:
+                new Date(),
+              notes:
+                "Awaiting administrator approval.",
+            },
+          });
 
-
-
-        transactionDate:
-          new Date(),
-
-      });
-
-
-
-
-
-
-    await prisma.wallet.update({
-
-      where: {
-        id: wallet.id,
+        return {
+  transaction,
+  withdrawal,
+  usdAmount: requestedUsd,
+  cryptoAmount,
+  exchangeRate,
+  successMessage:
+    wallet.portfolio.withdrawalSuccessMessage?.trim() ||
+    "Your withdrawal request has been submitted successfully and is awaiting administrator review.",
+};
       },
-
-
-      data: {
-
-        balance:
-          wallet.balance.minus(
-            sendAmount
-          ),
-
-
-        availableBalance:
-          wallet.availableBalance.minus(
-            sendAmount
-          ),
-
-
-        internalBalance:
-          wallet.internalBalance.minus(
-            sendAmount
-          ),
-
-      },
-
-    });
-
-
-
-
-
-    return transaction;
-
-
+      {
+        timeout: 15000,
+        maxWait: 10000,
+      }
+    );
   }
 
-
-
-
-
-
-
-
-
   async getStats() {
-
-
     const transactions =
       await transactionRepository.list();
 
-
-
-
     return {
-
       total:
         transactions.length,
-
 
       pending:
         transactions.filter(
           (transaction) =>
-            transaction.status === "PENDING"
+            transaction.status ===
+            TransactionStatus.PENDING
         ).length,
-
 
       processing:
         transactions.filter(
           (transaction) =>
-            transaction.status === "PROCESSING"
+            transaction.status ===
+            TransactionStatus.PROCESSING
         ).length,
-
 
       completed:
         transactions.filter(
           (transaction) =>
-            transaction.status === "COMPLETED"
+            transaction.status ===
+            TransactionStatus.COMPLETED
         ).length,
-
 
       failed:
         transactions.filter(
           (transaction) =>
-            transaction.status === "FAILED"
+            transaction.status ===
+            TransactionStatus.FAILED
         ).length,
 
-
-      cancelled:
+            cancelled:
         transactions.filter(
           (transaction) =>
-            transaction.status === "CANCELLED"
+            transaction.status ===
+            TransactionStatus.CANCELLED
         ).length,
-
     };
-
-
   }
-
-
 }
-
-
-
-
 
 export const transactionService =
   new TransactionService();

@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { UserRole } from "@prisma/client";
 
 import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/admin-auth";
 import { walletService } from "@/server/services/wallet.service";
-
 
 const SUPPORTED_GENERATION = [
   "BTC",
@@ -17,41 +15,22 @@ const SUPPORTED_GENERATION = [
   "USDT",
 ];
 
-
 export async function POST(request: Request) {
-
   try {
+    const { session, response } =
+      await requireAdmin();
 
-    const session =
-      await getServerSession(authOptions);
-
-
-    if (!session?.user) {
-
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized.",
-        },
-        {
-          status: 401,
-        }
-      );
-
+    if (response) {
+      return response;
     }
 
-
-    const body =
-      await request.json();
-
+    const body = await request.json();
 
     const {
       portfolioId,
     } = body;
 
-
     if (!portfolioId) {
-
       return NextResponse.json(
         {
           success: false,
@@ -61,77 +40,45 @@ export async function POST(request: Request) {
           status: 400,
         }
       );
-
     }
-
-
 
     const [
       currencies,
       existingWallets,
     ] = await Promise.all([
-
-
       prisma.currency.findMany({
-
         where: {
-
           isActive: true,
-
           isCrypto: true,
-
         },
 
         include: {
-
           networks: {
-
             where: {
-
               isActive: true,
-
             },
 
             orderBy: {
-
               name: "asc",
-
             },
-
           },
-
         },
 
         orderBy: {
-
           name: "asc",
-
         },
-
       }),
 
-
-
       prisma.wallet.findMany({
-
         where: {
-
           portfolioId,
-
         },
 
         select: {
-
           currencyId: true,
-
         },
-
       }),
-
-
     ]);
-
-
 
     const existingCurrencyIds =
       new Set(
@@ -141,137 +88,78 @@ export async function POST(request: Request) {
         )
       );
 
-
-
     const createdWallets = [];
-
     const skippedCurrencies = [];
 
-
-
-
     for (const currency of currencies) {
-
-
       if (
         !SUPPORTED_GENERATION.includes(
           currency.code
         )
       ) {
-
         skippedCurrencies.push({
-
-          currency:
-            currency.code,
-
+          currency: currency.code,
           reason:
             "Wallet generation is not supported.",
-
         });
 
-
         continue;
-
       }
-
-
-
 
       if (
         existingCurrencyIds.has(
           currency.id
         )
       ) {
-
         skippedCurrencies.push({
-
-          currency:
-            currency.code,
-
+          currency: currency.code,
           reason:
             "Wallet already exists.",
-
         });
 
-
         continue;
-
       }
-
-
-
 
       const network =
         currency.networks[0];
 
-
-
-
       try {
-
-
         const wallet =
           await walletService.assignWallet({
-
             currentUserRole:
               UserRole.ADMIN,
 
-
             adminUserId:
-              (session.user as any).id,
-
+              session.user.id,
 
             portfolioId,
-
 
             currencyId:
               currency.id,
 
-
             networkId:
               network?.id,
 
-
-            generate:
-              true,
-
+            generate: true,
           });
 
-
-
         createdWallets.push(wallet);
-
-
-
-      } catch(error) {
-
-
+      } catch (error) {
         console.error(
           `Failed generating ${currency.code}:`,
           error
         );
 
-
         skippedCurrencies.push({
-
-          currency:
-            currency.code,
-
+          currency: currency.code,
 
           reason:
             error instanceof Error
               ? error.message
               : "Unknown error",
-
         });
-
-
       }
-
-
     }
-
-
 
     console.log(
       "ASSIGN ALL RESULT",
@@ -293,65 +181,38 @@ export async function POST(request: Request) {
       }
     );
 
-
-
-
     return NextResponse.json({
-
       success: true,
-
 
       created:
         createdWallets.length,
 
-
       skipped:
         skippedCurrencies.length,
 
-
       skippedCurrencies,
-
 
       wallets:
         createdWallets,
-
     });
-
-
-
-  } catch(error) {
-
-
+  } catch (error) {
     console.error(
       "Assign All Error:",
       error
     );
 
-
-
     return NextResponse.json(
-
       {
-
         success: false,
-
 
         message:
           error instanceof Error
             ? error.message
             : "Something went wrong.",
-
       },
-
       {
-
         status: 500,
-
       }
-
     );
-
-
   }
-
 }

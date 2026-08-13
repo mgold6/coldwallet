@@ -1,145 +1,98 @@
 import { NextResponse } from "next/server";
-
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-
 import prisma from "@/lib/prisma";
 
-
 export async function POST(req: Request) {
-
   try {
-
     const session =
       await getServerSession(authOptions);
 
-
     if (!session) {
-
       return NextResponse.json(
         {
-          success:false,
-          message:"Unauthorized",
+          success: false,
+          message: "Unauthorized",
         },
         {
-          status:401,
+          status: 401,
         }
       );
-
     }
 
-
     const userId =
-      (session.user as any).id;
-
-
+      session.user.id;
 
     const body =
       await req.json();
-
 
     const {
       portfolioId,
     } = body;
 
-
-
-    if(!portfolioId){
-
+    if (!portfolioId) {
       return NextResponse.json(
         {
-          success:false,
-          message:"Portfolio ID required",
+          success: false,
+          message: "Portfolio ID required",
         },
         {
-          status:400,
+          status: 400,
         }
       );
-
     }
-
-
 
     const portfolio =
       await prisma.portfolio.findFirst({
-
-        where:{
-
-          id:portfolioId,
-
+        where: {
+          id: portfolioId,
           userId,
-
         },
-
       });
 
-
-
-    if(!portfolio){
-
+    if (!portfolio) {
       return NextResponse.json(
         {
-          success:false,
-          message:"Portfolio not found",
+          success: false,
+          message: "Portfolio not found",
         },
         {
-          status:404,
+          status: 404,
         }
       );
-
     }
 
-
-
     await prisma.user.update({
-
-      where:{
-        id:userId,
+      where: {
+        id: userId,
       },
-
-      data:{
-
+      data: {
         selectedPortfolioId:
           portfolioId,
-
       },
-
     });
-
-
 
     return NextResponse.json({
-
-      success:true,
-
+      success: true,
       selectedPortfolioId:
         portfolioId,
-
     });
-
-
-
-  } catch(error){
-
-
+  } catch (error) {
     console.error(
       "SELECT PORTFOLIO ERROR:",
       error
     );
 
-
     return NextResponse.json(
       {
-        success:false,
-        message:"Failed selecting portfolio",
+        success: false,
+        message:
+          "Failed selecting portfolio",
       },
       {
-        status:500,
+        status: 500,
       }
     );
-
-
   }
-
 }

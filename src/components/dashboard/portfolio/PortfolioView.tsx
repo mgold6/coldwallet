@@ -1,7 +1,12 @@
 import Link from "next/link";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
-import { Plus, Wallet, BarChart3, BookOpen } from "lucide-react";
+import {
+  Plus,
+  Wallet,
+  BarChart3,
+  BookOpen,
+} from "lucide-react";
 
 export default function PortfolioPage() {
   return (
@@ -18,7 +23,7 @@ export default function PortfolioPage() {
 
           <p className="mt-3 text-gray-400">
             Welcome to your portfolio dashboard. Once you add or connect
-            assets, you'll be able to monitor performance, allocation,
+            assets, you&apos;ll be able to monitor performance, allocation,
             and market value from one secure location.
           </p>
         </div>
@@ -26,9 +31,7 @@ export default function PortfolioPage() {
         {/* Summary Card */}
 
         <section className="mt-10 rounded-2xl border border-gray-800 bg-[#111827] p-8">
-
           <div className="flex items-center justify-between">
-
             <div>
               <p className="text-gray-400">
                 Total Portfolio Value
@@ -44,21 +47,17 @@ export default function PortfolioPage() {
             </div>
 
             <Wallet className="h-16 w-16 text-cyan-400" />
-
           </div>
-
         </section>
 
         {/* Quick Actions */}
 
         <section className="mt-10">
-
           <h2 className="mb-6 text-2xl font-semibold">
             Quick Actions
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-
             <Link
               href="#"
               className="rounded-2xl border border-gray-800 bg-[#111827] p-6 transition hover:border-cyan-400"
@@ -118,15 +117,12 @@ export default function PortfolioPage() {
                 Improve your blockchain knowledge and security skills.
               </p>
             </Link>
-
           </div>
-
         </section>
 
         {/* Empty State */}
 
         <section className="mt-12 rounded-2xl border border-dashed border-gray-700 p-12 text-center">
-
           <h2 className="text-3xl font-semibold">
             Your Portfolio is Empty
           </h2>
@@ -143,9 +139,7 @@ export default function PortfolioPage() {
           >
             Add Your First Asset
           </Link>
-
         </section>
-
       </main>
     </div>
   );

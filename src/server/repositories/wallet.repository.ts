@@ -18,12 +18,12 @@ export class WalletRepository {
   }
 
   async findByAddress(address: string): Promise<Wallet | null> {
-    return prisma.wallet.findUnique({
-      where: {
-        address,
-      },
-    });
-  }
+  return prisma.wallet.findFirst({
+    where: {
+      address,
+    },
+  });
+}
 
   async findByPortfolio(portfolioId: string): Promise<Wallet[]> {
     return prisma.wallet.findMany({

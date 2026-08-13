@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Users,
   Wallet,
-  Briefcase,
   ArrowLeftRight,
   FileText,
   Settings,
@@ -14,7 +13,6 @@ import {
   Upload,
   LifeBuoy,
 } from "lucide-react";
-
 
 const adminItems = [
   {
@@ -64,11 +62,8 @@ const adminItems = [
   },
 ];
 
-
 export default function AdminSidebar() {
-
   return (
-
     <aside
       className="
         flex
@@ -80,9 +75,7 @@ export default function AdminSidebar() {
         bg-slate-950
       "
     >
-
       <div className="p-6">
-
         <h1 className="text-2xl font-bold text-white">
           ColdWallet Admin
         </h1>
@@ -90,19 +83,13 @@ export default function AdminSidebar() {
         <p className="mt-2 text-sm text-gray-400">
           Administration Console
         </p>
-
       </div>
 
-
       <nav className="flex-1 space-y-2 p-6">
-
         {adminItems.map((item) => {
-
           const Icon = item.icon;
 
-
           return (
-
             <Link
               key={item.name}
               href={item.href}
@@ -119,26 +106,16 @@ export default function AdminSidebar() {
                 hover:text-cyan-400
               "
             >
+              <Icon size={20} />
 
-              <Icon size={20}/>
-
-              <span>
-                {item.name}
-              </span>
-
+              <span>{item.name}</span>
             </Link>
-
           );
-
         })}
-
       </nav>
 
-
       <div className="border-t border-gray-800 p-6">
-
         <div className="rounded-xl bg-cyan-500/10 p-4">
-
           <h3 className="font-semibold text-white">
             Admin Access
           </h3>
@@ -146,14 +123,8 @@ export default function AdminSidebar() {
           <p className="mt-2 text-sm text-gray-400">
             Manage users, wallets, assets, and platform activity.
           </p>
-
         </div>
-
       </div>
-
-
     </aside>
-
   );
-
 }

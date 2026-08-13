@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { FaBitcoin, FaEthereum } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden py-20 lg:py-28">
+    <section className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
 
       {/* Background Glow */}
 
@@ -27,8 +28,7 @@ export default function Hero() {
 
 
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
-
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 sm:gap-12 sm:px-6 lg:grid-cols-2 lg:px-8">
 
 
         {/* LEFT */}
@@ -44,8 +44,7 @@ export default function Hero() {
 
 
 
-
-          <h1 className="mt-6 text-5xl font-extrabold leading-tight text-white md:text-7xl">
+          <h1 className="mt-6 text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-7xl">
 
             Protect Your
 
@@ -57,8 +56,7 @@ export default function Hero() {
 
 
 
-
-          <p className="mt-6 max-w-xl text-lg leading-8 text-gray-400">
+          <p className="mt-6 max-w-xl text-base leading-7 text-gray-400 sm:text-lg sm:leading-8">
 
             ColdWallet helps individuals organize cryptocurrency portfolios,
             learn blockchain technology, and build stronger security habits
@@ -68,17 +66,26 @@ export default function Hero() {
 
 
 
-
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
 
-            <Button>
-              Get Started
-            </Button>
+
+            <Link href="/register">
+
+              <Button>
+                Get Started
+              </Button>
+
+            </Link>
 
 
-            <Button variant="secondary">
-              Learn More
-            </Button>
+
+            <Link href="/about">
+
+              <Button variant="secondary">
+                Learn More
+              </Button>
+
+            </Link>
 
 
           </div>
@@ -86,7 +93,7 @@ export default function Hero() {
 
 
 
-          <div className="mt-12 flex flex-wrap gap-10">
+          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-6 sm:mt-12 sm:gap-10">
 
 
             <div>
@@ -144,10 +151,10 @@ export default function Hero() {
         <div className="relative flex justify-center">
 
 
-          <div className="relative w-full max-w-md rounded-3xl border border-blue-500/20 bg-[#10141F] p-8 shadow-2xl shadow-blue-500/20">
+          <div className="relative w-full max-w-md rounded-3xl border border-blue-500/20 bg-[#10141F] p-5 shadow-2xl shadow-blue-500/20 sm:p-8">
 
 
-            <div className="mb-8 flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
 
 
               <div>
@@ -157,17 +164,17 @@ export default function Hero() {
                 </p>
 
 
-                <h2 className="mt-2 text-3xl font-bold text-white">
+                <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
                   ColdWallet
                 </h2>
-
 
               </div>
 
 
-              <div className="rounded-full bg-blue-600 p-4">
 
-                <FaBitcoin className="text-3xl text-white" />
+              <div className="shrink-0 rounded-full bg-blue-600 p-3 sm:p-4">
+
+                <FaBitcoin className="text-2xl text-white sm:text-3xl" />
 
               </div>
 
@@ -177,9 +184,7 @@ export default function Hero() {
 
 
 
-            {/* Portfolio Value */}
-
-            <div className="rounded-2xl bg-black/40 p-6">
+            <div className="rounded-2xl bg-black/40 p-4 sm:p-6">
 
 
               <p className="text-sm text-gray-500">
@@ -187,7 +192,7 @@ export default function Hero() {
               </p>
 
 
-              <h3 className="mt-2 text-4xl font-bold text-white">
+              <h3 className="mt-2 break-words text-3xl font-bold text-white sm:text-4xl">
                 $285,649,988.83
               </h3>
 
@@ -202,11 +207,10 @@ export default function Hero() {
 
 
 
+            <div className="mt-4 grid gap-3 sm:mt-5 sm:gap-4">
 
-            <div className="mt-5 grid gap-4">
 
-
-              <div className="rounded-2xl bg-black/40 p-5">
+              <div className="rounded-2xl bg-black/40 p-4 sm:p-5">
 
                 <p className="text-sm text-gray-500">
                   Security Status
@@ -257,7 +261,7 @@ export default function Hero() {
 
 
 
-            <div className="absolute -right-5 -top-5 rounded-full bg-blue-600 p-4 shadow-lg shadow-blue-500/40">
+            <div className="absolute -right-2 -top-2 rounded-full bg-blue-600 p-3 shadow-lg shadow-blue-500/40 sm:-right-5 sm:-top-5 sm:p-4">
 
               <FaEthereum className="text-4xl text-white" />
 

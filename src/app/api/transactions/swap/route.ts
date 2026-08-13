@@ -1,24 +1,18 @@
 import { NextResponse } from "next/server";
-
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 
 import { transactionService } from "@/server/services/transaction.service";
 
-
 export async function POST(
   request: Request
 ) {
-
   try {
-
     const session =
       await getServerSession(authOptions);
 
-
     if (!session) {
-
       return NextResponse.json(
         {
           error: "Unauthorized",
@@ -27,19 +21,13 @@ export async function POST(
           status: 401,
         }
       );
-
     }
-
-
 
     const body =
       await request.json();
 
-
-
     const transaction =
       await transactionService.createSwap({
-
         fromWalletId:
           body.fromWalletId,
 
@@ -48,34 +36,22 @@ export async function POST(
 
         amount:
           body.amount,
-
       });
-
-
 
     return NextResponse.json(
       transaction
     );
-
-
-
-  } catch(error:any) {
-
-
+  } catch (error) {
     return NextResponse.json(
-
       {
         error:
-          error.message ||
-          "Swap failed",
+          error instanceof Error
+            ? error.message
+            : "Swap failed",
       },
-
       {
-        status:500,
+        status: 500,
       }
-
     );
-
   }
-
 }

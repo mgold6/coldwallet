@@ -1,13 +1,28 @@
+interface WalletCurrency {
+  code: string;
+  name: string;
+}
+
+interface Wallet {
+  id: string;
+  availableBalance: string | number;
+  currency: WalletCurrency;
+}
+
+interface Market {
+  symbol: string;
+  current_price: number;
+}
+
 interface WalletCardsProps {
-  wallets: any[];
-  markets: any[];
+  wallets: Wallet[];
+  markets: Market[];
 }
 
 export default function WalletCards({
   wallets,
   markets,
 }: WalletCardsProps) {
-
   if (!wallets.length) {
     return (
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
@@ -22,7 +37,6 @@ export default function WalletCards({
     );
   }
 
-
   const icons: Record<string, string> = {
     BTC: "₿",
     ETH: "Ξ",
@@ -36,42 +50,31 @@ export default function WalletCards({
     USDT: "₮",
   };
 
-
   return (
     <section className="space-y-5">
-
       <h2 className="text-2xl font-bold text-white">
         Your Assets
       </h2>
 
-
       <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-
         {wallets.map((wallet) => {
-
           const symbol =
             wallet.currency.code.toUpperCase();
 
-
-          const market =
-            markets.find(
-              (coin) =>
-                coin.symbol.toUpperCase() === symbol
-            );
-
+          const market = markets.find(
+            (coin) =>
+              coin.symbol.toUpperCase() ===
+              symbol
+          );
 
           const coinPrice =
             market?.current_price ?? 0;
-
 
           const usdValue =
             Number(wallet.availableBalance) *
             coinPrice;
 
-
-
           return (
-
             <div
               key={wallet.id}
               className="
@@ -85,12 +88,7 @@ export default function WalletCards({
                 hover:bg-slate-800/50
               "
             >
-
-
-              {/* Coin */}
-
               <div className="flex items-center gap-4">
-
                 <div
                   className="
                     flex
@@ -107,31 +105,21 @@ export default function WalletCards({
                   {icons[symbol] ?? "◉"}
                 </div>
 
-
                 <div>
-
                   <h3 className="font-semibold text-white">
                     {wallet.currency.name}
                   </h3>
 
-
                   <p className="text-sm text-slate-400">
                     {Number(
                       wallet.availableBalance
-                    ).toLocaleString()} {symbol}
+                    ).toLocaleString()}{" "}
+                    {symbol}
                   </p>
-
                 </div>
-
               </div>
 
-
-
-
-              {/* USD Balance */}
-
               <div className="text-right">
-
                 <p className="text-lg font-bold text-white">
                   $
                   {usdValue.toLocaleString(
@@ -142,7 +130,6 @@ export default function WalletCards({
                     }
                   )}
                 </p>
-
 
                 <span
                   className="
@@ -156,19 +143,11 @@ export default function WalletCards({
                 >
                   Available
                 </span>
-
-
               </div>
-
-
             </div>
-
           );
-
         })}
-
       </div>
-
     </section>
   );
 }
