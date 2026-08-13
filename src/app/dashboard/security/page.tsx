@@ -15,6 +15,7 @@ type LoginRecord = {
   id: string;
   ipAddress?: string | null;
   userAgent?: string | null;
+  success?: boolean;
   createdAt: string;
 };
 
@@ -23,6 +24,40 @@ type TwoFactorStatusResponse = {
   enabled?: boolean;
   error?: string;
 };
+
+function formatLoginDevice(userAgent?: string | null) {
+  if (!userAgent) {
+    return "Unknown device";
+  }
+
+  let browser = "Browser";
+
+  if (/Edg\//i.test(userAgent)) {
+    browser = "Edge";
+  } else if (/Chrome\//i.test(userAgent)) {
+    browser = "Chrome";
+  } else if (/Firefox\//i.test(userAgent)) {
+    browser = "Firefox";
+  } else if (/Safari\//i.test(userAgent) && !/Chrome\//i.test(userAgent)) {
+    browser = "Safari";
+  }
+
+  let operatingSystem = "Unknown OS";
+
+  if (/Macintosh|Mac OS X/i.test(userAgent)) {
+    operatingSystem = "macOS";
+  } else if (/Windows/i.test(userAgent)) {
+    operatingSystem = "Windows";
+  } else if (/Android/i.test(userAgent)) {
+    operatingSystem = "Android";
+  } else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+    operatingSystem = "iOS";
+  } else if (/Linux/i.test(userAgent)) {
+    operatingSystem = "Linux";
+  }
+
+  return `${browser} on ${operatingSystem}`;
+}
 
 export default function SecurityPage() {
   const [twoFactorEnabled, setTwoFactorEnabled] =
@@ -706,15 +741,31 @@ export default function SecurityPage() {
                   key={login.id}
                   className="rounded-lg bg-slate-900 p-4"
                 >
-                  <p className="text-white">
-                    Login from this device
-                  </p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-white">
+                        {formatLoginDevice(login.userAgent)}
+                      </p>
 
-                  <p className="text-sm text-slate-400">
-                    {new Date(
-                      login.createdAt
-                    ).toLocaleString()}
-                  </p>
+                      <p className="text-sm text-slate-400">
+                        {new Date(
+                          login.createdAt
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`shrink-0 rounded-full px-3 py-1 text-sm font-medium ${
+                        login.success
+                          ? "bg-emerald-950 text-emerald-400"
+                          : "bg-red-950 text-red-400"
+                      }`}
+                    >
+                      {login.success
+                        ? "Successful"
+                        : "Failed"}
+                    </span>
+                  </div>
 
                 </div>
               )
