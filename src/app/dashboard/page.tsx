@@ -54,7 +54,7 @@ export default async function DashboardPage() {
     )
   );
 
-  const serializedWallets =
+      const serializedWallets =
     wallets.map((wallet) => ({
       ...wallet,
 
@@ -79,6 +79,16 @@ export default async function DashboardPage() {
       lockedBalance:
         Number(
           wallet.lockedBalance ?? 0
+        ),
+
+      withdrawalLocked:
+        Number(
+          wallet.withdrawalLocked ?? 0
+        ),
+
+      reservedWithdrawalBalance:
+        Number(
+          wallet.reservedWithdrawalBalance ?? 0
         ),
     }));
 
@@ -137,11 +147,22 @@ export default async function DashboardPage() {
 
         const change =
           market
-            ? usdValue *
-              (
-                market.price_change_percentage_24h /
-                100
-              )
+            ? (() => {
+                const percentage =
+                  market.price_change_percentage_24h;
+
+                const multiplier =
+                  1 + percentage / 100;
+
+                if (multiplier <= 0) {
+                  return 0;
+                }
+
+                const previousValue =
+                  usdValue / multiplier;
+
+                return usdValue - previousValue;
+              })()
             : 0;
 
         return total + change;
