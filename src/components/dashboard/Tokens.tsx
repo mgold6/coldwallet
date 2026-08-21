@@ -8,6 +8,7 @@ interface MarketCoin {
   name: string;
   image: string;
   current_price: number;
+  price_change_24h?: number;
   price_change_percentage_24h: number;
 }
 
@@ -47,9 +48,7 @@ export default function Tokens({
 }: TokensProps) {
   const walletMap = wallets.reduce<WalletMap>(
     (acc, wallet) => {
-      acc[wallet.currency.code.toUpperCase()] =
-        wallet;
-
+      acc[wallet.currency.code.toUpperCase()] = wallet;
       return acc;
     },
     {}
@@ -71,14 +70,42 @@ export default function Tokens({
         )
       : 0;
 
-    const value = market
-      ? balance * market.current_price
+    const currentPrice = market
+      ? Number(market.current_price ?? 0)
       : 0;
 
-    const change = market
-      ? value *
-        (market.price_change_percentage_24h /
-          100)
+    /*
+     * Current token value:
+     *
+     * wallet balance × current live market price
+     */
+    const value = balance * currentPrice;
+
+    /*
+     * CoinGecko already provides the actual
+     * 24H price movement in USD.
+     *
+     * Therefore:
+     *
+     * wallet balance × 24H price change
+     *
+     * gives the actual 24H dollar change
+     * for this token.
+     */
+    const priceChange24h = market
+      ? Number(market.price_change_24h ?? 0)
+      : 0;
+
+    const change = balance * priceChange24h;
+
+    /*
+     * Use the market's supplied 24H percentage
+     * for the token percentage display.
+     */
+    const changePercentage = market
+      ? Number(
+          market.price_change_percentage_24h ?? 0
+        )
       : 0;
 
     return {
@@ -87,6 +114,8 @@ export default function Tokens({
       balance,
       value,
       change,
+      changePercentage,
+      currentPrice,
       market,
     };
   });
@@ -125,11 +154,14 @@ export default function Tokens({
                 flex
                 items-center
                 justify-between
+                gap-4
               "
             >
+              {/* LEFT: icon, name, balance */}
               <div
                 className="
                   flex
+                  min-w-0
                   items-center
                   gap-4
                 "
@@ -139,6 +171,7 @@ export default function Tokens({
                     flex
                     h-12
                     w-12
+                    shrink-0
                     items-center
                     justify-center
                     rounded-full
@@ -163,9 +196,10 @@ export default function Tokens({
                   )}
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <h3
                     className="
+                      truncate
                       font-semibold
                       text-white
                     "
@@ -190,7 +224,8 @@ export default function Tokens({
                 </div>
               </div>
 
-              <div className="text-right">
+              {/* RIGHT: current value + 24H change */}
+              <div className="shrink-0 text-right">
                 <p
                   className="
                     text-lg
@@ -207,29 +242,26 @@ export default function Tokens({
                     }
                   )}
                 </p>
-
-                <p
-                  className={`
+<p
+                  className="
+                    mt-1
                     text-sm
                     font-medium
-                    ${
-                      token.change >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }
-                  `}
+                    text-green-400
+                  "
                 >
-                  {token.change >= 0
-                    ? "+$"
-                    : "-$"}
-
-                  {Math.abs(
-                    token.change
-                  ).toLocaleString(
+                  $
+                  {token.currentPrice.toLocaleString(
                     undefined,
                     {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
+                      minimumFractionDigits:
+                        token.currentPrice >= 1
+                          ? 2
+                          : 4,
+                      maximumFractionDigits:
+                        token.currentPrice >= 1
+                          ? 2
+                          : 8,
                     }
                   )}
                 </p>

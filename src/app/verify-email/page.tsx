@@ -114,7 +114,7 @@ function VerifyEmailContent() {
 
       router.replace(
         session?.user?.role === "ADMIN"
-          ? "/dashboard/admin"
+          ? "/admin"
           : "/dashboard"
       );
 

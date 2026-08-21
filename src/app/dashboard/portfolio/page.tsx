@@ -143,14 +143,26 @@ export default async function PortfolioPage() {
 
   const totalChange =
     holdings.reduce(
-      (total, item) =>
-        total +
-        (
-          item.value *
-          (
-            item.change / 100
-          )
-        ),
+      (total, item) => {
+        if (item.value <= 0) {
+          return total;
+        }
+
+        const percentage = item.change;
+        const multiplier = 1 + percentage / 100;
+
+        if (multiplier <= 0) {
+          return total;
+        }
+
+        const previousValue =
+          item.value / multiplier;
+
+        const change =
+          item.value - previousValue;
+
+        return total + change;
+      },
       0
     );
 

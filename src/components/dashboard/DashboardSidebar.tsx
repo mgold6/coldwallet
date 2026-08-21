@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { getServerSession } from "next-auth";
+"use client";
 
-import { authOptions } from "@/lib/auth";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const adminNavigation = [
   {
@@ -69,40 +69,28 @@ const userNavigation = [
   },
 ];
 
-export default async function DashboardSidebar() {
-  const session = await getServerSession(authOptions);
+export default function DashboardSidebar() {
+  const pathname = usePathname();
 
-  const role = session?.user?.role;
-
-  const isAdmin = role === "ADMIN";
-
-  const navigation = isAdmin
-    ? adminNavigation
-    : userNavigation;
+  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  const navigation = isAdmin ? adminNavigation : userNavigation;
 
   return (
     <aside
       className="
+        hidden
+        min-h-screen
         w-72
+        shrink-0
+        flex-col
         border-r
         border-slate-800
         bg-slate-900
+        md:flex
       "
     >
-      <div
-        className="
-          border-b
-          border-slate-800
-          p-6
-        "
-      >
-        <h1
-          className="
-            text-3xl
-            font-bold
-            text-cyan-400
-          "
-        >
+      <div className="border-b border-slate-800 p-6">
+        <h1 className="text-3xl font-bold text-cyan-400">
           ColdWallet
         </h1>
 
@@ -113,26 +101,50 @@ export default async function DashboardSidebar() {
         </p>
       </div>
 
-      <nav className="space-y-2 p-4">
-        {navigation.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="
-              block
-              rounded-lg
-              px-4
-              py-3
-              text-slate-300
-              transition
-              hover:bg-slate-800
-              hover:text-cyan-400
-            "
-          >
-            {item.name}
-          </Link>
-        ))}
+      <nav className="flex-1 space-y-2 p-4">
+        {navigation.map((item) => {
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/admin" &&
+              item.href !== "/dashboard" &&
+              pathname.startsWith(`${item.href}/`));
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`
+                block
+                rounded-lg
+                px-4
+                py-3
+                transition
+                ${
+                  isActive
+                    ? "bg-cyan-500/10 text-cyan-400"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-cyan-400"
+                }
+              `}
+            >
+              {item.name}
+            </Link>
+          );
+        })}
       </nav>
+
+      <div className="border-t border-slate-800 p-6">
+        <div className="rounded-xl bg-cyan-500/10 p-4">
+          <h3 className="font-semibold text-white">
+            {isAdmin ? "Admin Access" : "Secure Account"}
+          </h3>
+
+          <p className="mt-2 text-sm text-slate-400">
+            {isAdmin
+              ? "Manage users, wallets, assets, and platform activity."
+              : "Manage your digital assets and account securely."}
+          </p>
+        </div>
+      </div>
     </aside>
   );
 }

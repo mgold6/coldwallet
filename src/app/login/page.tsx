@@ -81,7 +81,7 @@ export default function LoginPage() {
             "ADMIN"
           ) {
             router.replace(
-              "/dashboard/admin"
+              "/admin"
             );
           } else {
             router.replace(
@@ -211,7 +211,7 @@ export default function LoginPage() {
           "ADMIN"
         ) {
           router.replace(
-            "/dashboard/admin"
+            "/admin"
           );
         } else {
           router.replace(

@@ -7,8 +7,7 @@ import { marketService } from "@/server/services/market.service";
 import { userWalletService } from "@/server/services/user-wallet.service";
 import { transactionService } from "@/server/services/transaction.service";
 
-import QuickActions from "@/components/dashboard/QuickActions";
-import Tokens from "@/components/dashboard/Tokens";
+import LivePortfolio from "@/components/dashboard/LivePortfolio";
 import TransactionHistory from "@/components/dashboard/TransactionHistory";
 
 export const dynamic = "force-dynamic";
@@ -40,21 +39,7 @@ export default async function DashboardPage() {
     ),
   ]);
 
-  console.log(
-    "DASHBOARD USER ID:",
-    userId
-  );
-
-  console.log(
-    "DASHBOARD WALLETS:",
-    JSON.stringify(
-      wallets,
-      null,
-      2
-    )
-  );
-
-      const serializedWallets =
+  const serializedWallets =
     wallets.map((wallet) => ({
       ...wallet,
 
@@ -92,171 +77,13 @@ export default async function DashboardPage() {
         ),
     }));
 
-  const totalBalance =
-    serializedWallets.reduce(
-      (total, wallet) => {
-        const symbol =
-          wallet.currency.code.toLowerCase();
-
-        const market =
-          markets.find(
-            (coin) =>
-              coin.symbol.toLowerCase() ===
-              symbol
-          );
-
-        const balance =
-          Number(
-            wallet.balance ?? 0
-          );
-
-        const usdValue =
-          market
-            ? balance *
-              market.current_price
-            : 0;
-
-        return total + usdValue;
-      },
-      0
-    );
-
-  const totalChange =
-    serializedWallets.reduce(
-      (total, wallet) => {
-        const symbol =
-          wallet.currency.code.toLowerCase();
-
-        const market =
-          markets.find(
-            (coin) =>
-              coin.symbol.toLowerCase() ===
-              symbol
-          );
-
-        const balance =
-          Number(
-            wallet.balance ?? 0
-          );
-
-        const usdValue =
-          market
-            ? balance *
-              market.current_price
-            : 0;
-
-        const change =
-          market
-            ? (() => {
-                const percentage =
-                  market.price_change_percentage_24h;
-
-                const multiplier =
-                  1 + percentage / 100;
-
-                if (multiplier <= 0) {
-                  return 0;
-                }
-
-                const previousValue =
-                  usdValue / multiplier;
-
-                return usdValue - previousValue;
-              })()
-            : 0;
-
-        return total + change;
-      },
-      0
-    );
-
-  const totalChangePercentage =
-    totalBalance > 0
-      ? (totalChange / totalBalance) * 100
-      : 0;
 
   return (
     <>
-      <div
-        className="
-          rounded-3xl
-          border
-          border-slate-800
-          bg-gradient-to-br
-          from-slate-900
-          to-slate-950
-          p-8
-        "
-      >
-        <p className="text-slate-400">
-          Total Balance
-        </p>
-
-        <h2
-          className="
-            mt-3
-            text-5xl
-            font-bold
-            text-white
-          "
-        >
-          $
-          {totalBalance.toLocaleString(
-            undefined,
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          )}
-        </h2>
-
-        <p
-          className={`
-            mt-2
-            font-medium
-            ${
-              totalChange >= 0
-                ? "text-green-400"
-                : "text-red-400"
-            }
-          `}
-        >
-          {totalChange >= 0
-            ? "+"
-            : "-"}
-          $
-          {Math.abs(
-            totalChange
-          ).toLocaleString(
-            undefined,
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          )}
-          {" "}
-          (
-          {totalChangePercentage >= 0
-            ? "+"
-            : ""}
-          {totalChangePercentage.toFixed(
-            2
-          )}
-          %
-          )
-        </p>
-      </div>
-
-      <div className="mt-8">
-        <QuickActions />
-      </div>
-
-      <div className="mt-8">
-        <Tokens
-          markets={markets}
-          wallets={serializedWallets}
-        />
-      </div>
+      <LivePortfolio
+        initialMarkets={markets}
+        wallets={serializedWallets}
+      />
 
       <div className="mt-8">
         <TransactionHistory
