@@ -3,11 +3,18 @@ import {
   Prisma,
   UserRole,
   UserStatus,
-  NetworkEnvironment,
 } from "@prisma/client";
+
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+
+const NetworkEnvironment = {
+  MAINNET: "MAINNET",
+  TESTNET: "TESTNET",
+  DEVNET: "DEVNET",
+  PREPROD: "PREPROD",
+} as const;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,9 +23,11 @@ const prisma = new PrismaClient();
 */
 
 const ADMIN_EMAIL =
-  process.env.SEED_ADMIN_EMAIL ?? "admin@coldwallet.io";
+  process.env.SEED_ADMIN_EMAIL ??
+  "admin@coldwallet.io";
 
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
+const ADMIN_PASSWORD =
+  process.env.SEED_ADMIN_PASSWORD;
 
 if (!ADMIN_PASSWORD) {
   throw new Error(
@@ -26,7 +35,8 @@ if (!ADMIN_PASSWORD) {
   );
 }
 
-const adminPassword: string = ADMIN_PASSWORD;
+const adminPassword: string =
+  ADMIN_PASSWORD;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,14 +44,18 @@ const adminPassword: string = ADMIN_PASSWORD;
 |--------------------------------------------------------------------------
 */
 
-type CurrencySeed = Prisma.CurrencyCreateInput;
+type CurrencySeed =
+  Prisma.CurrencyCreateInput;
+
+type NetworkEnvironmentValue =
+  (typeof NetworkEnvironment)[keyof typeof NetworkEnvironment];
 
 type NetworkSeed = {
   currencyCode: string;
   name: string;
   code: string;
   blockchain: string;
-  environment: NetworkEnvironment;
+  environment: NetworkEnvironmentValue;
   chainId?: string;
   nativeCurrency?: string;
   rpcUrl?: string;
@@ -168,7 +182,8 @@ const networks: NetworkSeed[] = [
     name: "Internal",
     code: "INTERNAL",
     blockchain: "Internal",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "USD",
     isTestnet: false,
   },
@@ -182,7 +197,8 @@ const networks: NetworkSeed[] = [
     name: "Bitcoin Mainnet",
     code: "BTC_MAINNET",
     blockchain: "Bitcoin",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "BTC",
     isTestnet: false,
   },
@@ -192,7 +208,8 @@ const networks: NetworkSeed[] = [
     name: "Bitcoin Testnet",
     code: "BTC_TESTNET",
     blockchain: "Bitcoin",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     nativeCurrency: "BTC",
     isTestnet: true,
   },
@@ -206,7 +223,8 @@ const networks: NetworkSeed[] = [
     name: "Ethereum Mainnet",
     code: "ETH_MAINNET",
     blockchain: "Ethereum",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     chainId: "1",
     nativeCurrency: "ETH",
     isTestnet: false,
@@ -217,7 +235,8 @@ const networks: NetworkSeed[] = [
     name: "Ethereum Sepolia",
     code: "ETH_SEPOLIA",
     blockchain: "Ethereum",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "11155111",
     nativeCurrency: "ETH",
     isTestnet: true,
@@ -228,7 +247,8 @@ const networks: NetworkSeed[] = [
     name: "Ethereum Hoodi",
     code: "ETH_HOODI",
     blockchain: "Ethereum",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "560048",
     nativeCurrency: "ETH",
     isTestnet: true,
@@ -243,7 +263,8 @@ const networks: NetworkSeed[] = [
     name: "BNB Smart Chain Mainnet",
     code: "BSC_MAINNET",
     blockchain: "BNB Smart Chain",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     chainId: "56",
     nativeCurrency: "BNB",
     isTestnet: false,
@@ -254,7 +275,8 @@ const networks: NetworkSeed[] = [
     name: "BNB Smart Chain Testnet",
     code: "BSC_TESTNET",
     blockchain: "BNB Smart Chain",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "97",
     nativeCurrency: "BNB",
     isTestnet: true,
@@ -269,7 +291,8 @@ const networks: NetworkSeed[] = [
     name: "Solana Mainnet",
     code: "SOL_MAINNET",
     blockchain: "Solana",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "SOL",
     isTestnet: false,
   },
@@ -279,7 +302,8 @@ const networks: NetworkSeed[] = [
     name: "Solana Devnet",
     code: "SOL_DEVNET",
     blockchain: "Solana",
-    environment: NetworkEnvironment.DEVNET,
+    environment:
+      NetworkEnvironment.DEVNET,
     nativeCurrency: "SOL",
     isTestnet: true,
   },
@@ -293,7 +317,8 @@ const networks: NetworkSeed[] = [
     name: "XRP Ledger Mainnet",
     code: "XRP_MAINNET",
     blockchain: "XRP Ledger",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "XRP",
     isTestnet: false,
   },
@@ -303,7 +328,8 @@ const networks: NetworkSeed[] = [
     name: "XRP Ledger Testnet",
     code: "XRP_TESTNET",
     blockchain: "XRP Ledger",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     nativeCurrency: "XRP",
     isTestnet: true,
   },
@@ -313,7 +339,8 @@ const networks: NetworkSeed[] = [
     name: "XRP Ledger Devnet",
     code: "XRP_DEVNET",
     blockchain: "XRP Ledger",
-    environment: NetworkEnvironment.DEVNET,
+    environment:
+      NetworkEnvironment.DEVNET,
     nativeCurrency: "XRP",
     isTestnet: true,
   },
@@ -327,7 +354,8 @@ const networks: NetworkSeed[] = [
     name: "Cardano Mainnet",
     code: "ADA_MAINNET",
     blockchain: "Cardano",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "ADA",
     isTestnet: false,
   },
@@ -337,7 +365,8 @@ const networks: NetworkSeed[] = [
     name: "Cardano Preprod",
     code: "ADA_PREPROD",
     blockchain: "Cardano",
-    environment: NetworkEnvironment.PREPROD,
+    environment:
+      NetworkEnvironment.PREPROD,
     nativeCurrency: "ADA",
     isTestnet: true,
   },
@@ -351,7 +380,8 @@ const networks: NetworkSeed[] = [
     name: "Avalanche C-Chain Mainnet",
     code: "AVAX_MAINNET",
     blockchain: "Avalanche C-Chain",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     chainId: "43114",
     nativeCurrency: "AVAX",
     isTestnet: false,
@@ -362,7 +392,8 @@ const networks: NetworkSeed[] = [
     name: "Avalanche Fuji Testnet",
     code: "AVAX_FUJI",
     blockchain: "Avalanche C-Chain",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "43113",
     nativeCurrency: "AVAX",
     isTestnet: true,
@@ -377,7 +408,8 @@ const networks: NetworkSeed[] = [
     name: "Dogecoin Mainnet",
     code: "DOGE_MAINNET",
     blockchain: "Dogecoin",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "DOGE",
     isTestnet: false,
   },
@@ -387,7 +419,8 @@ const networks: NetworkSeed[] = [
     name: "Dogecoin Testnet",
     code: "DOGE_TESTNET",
     blockchain: "Dogecoin",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     nativeCurrency: "DOGE",
     isTestnet: true,
   },
@@ -401,7 +434,8 @@ const networks: NetworkSeed[] = [
     name: "Litecoin Mainnet",
     code: "LTC_MAINNET",
     blockchain: "Litecoin",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "LTC",
     isTestnet: false,
   },
@@ -411,7 +445,8 @@ const networks: NetworkSeed[] = [
     name: "Litecoin Testnet",
     code: "LTC_TESTNET",
     blockchain: "Litecoin",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     nativeCurrency: "LTC",
     isTestnet: true,
   },
@@ -425,7 +460,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — Ethereum Mainnet",
     code: "USDT_ETH_MAINNET",
     blockchain: "Ethereum",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     chainId: "1",
     nativeCurrency: "ETH",
     isTestnet: false,
@@ -436,7 +472,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — Ethereum Sepolia",
     code: "USDT_ETH_SEPOLIA",
     blockchain: "Ethereum",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "11155111",
     nativeCurrency: "ETH",
     isTestnet: true,
@@ -451,7 +488,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — BNB Smart Chain Mainnet",
     code: "USDT_BSC_MAINNET",
     blockchain: "BNB Smart Chain",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     chainId: "56",
     nativeCurrency: "BNB",
     isTestnet: false,
@@ -462,7 +500,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — BNB Smart Chain Testnet",
     code: "USDT_BSC_TESTNET",
     blockchain: "BNB Smart Chain",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "97",
     nativeCurrency: "BNB",
     isTestnet: true,
@@ -477,7 +516,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — TRON Mainnet",
     code: "USDT_TRON_MAINNET",
     blockchain: "TRON",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "TRX",
     isTestnet: false,
   },
@@ -487,7 +527,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — TRON Nile Testnet",
     code: "USDT_TRON_NILE",
     blockchain: "TRON",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     nativeCurrency: "TRX",
     isTestnet: true,
   },
@@ -501,7 +542,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — Solana Mainnet",
     code: "USDT_SOL_MAINNET",
     blockchain: "Solana",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     nativeCurrency: "SOL",
     isTestnet: false,
   },
@@ -511,7 +553,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — Solana Devnet",
     code: "USDT_SOL_DEVNET",
     blockchain: "Solana",
-    environment: NetworkEnvironment.DEVNET,
+    environment:
+      NetworkEnvironment.DEVNET,
     nativeCurrency: "SOL",
     isTestnet: true,
   },
@@ -525,7 +568,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — Avalanche C-Chain Mainnet",
     code: "USDT_AVAX_MAINNET",
     blockchain: "Avalanche C-Chain",
-    environment: NetworkEnvironment.MAINNET,
+    environment:
+      NetworkEnvironment.MAINNET,
     chainId: "43114",
     nativeCurrency: "AVAX",
     isTestnet: false,
@@ -536,7 +580,8 @@ const networks: NetworkSeed[] = [
     name: "USDT — Avalanche Fuji Testnet",
     code: "USDT_AVAX_FUJI",
     blockchain: "Avalanche C-Chain",
-    environment: NetworkEnvironment.TESTNET,
+    environment:
+      NetworkEnvironment.TESTNET,
     chainId: "43113",
     nativeCurrency: "AVAX",
     isTestnet: true,
@@ -603,15 +648,20 @@ const settings: SettingSeed[] = [
 |--------------------------------------------------------------------------
 */
 
-async function getCurrencyId(code: string): Promise<string> {
-  const currency = await prisma.currency.findUnique({
-    where: {
-      code,
-    },
-  });
+async function getCurrencyId(
+  code: string
+): Promise<string> {
+  const currency =
+    await prisma.currency.findUnique({
+      where: {
+        code,
+      },
+    });
 
   if (!currency) {
-    throw new Error(`Currency ${code} not found.`);
+    throw new Error(
+      `Currency ${code} not found.`
+    );
   }
 
   return currency.id;
@@ -624,17 +674,23 @@ async function getCurrencyId(code: string): Promise<string> {
 */
 
 async function createAdmin(): Promise<void> {
-  const hashedPassword = await bcrypt.hash(adminPassword, 12);
+  const hashedPassword =
+    await bcrypt.hash(
+      adminPassword,
+      12
+    );
 
   await prisma.user.upsert({
     where: {
       email: ADMIN_EMAIL,
     },
+
     update: {
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
       password: hashedPassword,
     },
+
     create: {
       email: ADMIN_EMAIL,
       firstName: "System",
@@ -647,7 +703,9 @@ async function createAdmin(): Promise<void> {
     },
   });
 
-  console.log("✓ Administrator seeded");
+  console.log(
+    "✓ Administrator seeded"
+  );
 }
 
 /*
@@ -662,6 +720,7 @@ async function seedCurrencies(): Promise<void> {
       where: {
         code: currency.code,
       },
+
       update: {
         name: currency.name,
         symbol: currency.symbol,
@@ -669,11 +728,14 @@ async function seedCurrencies(): Promise<void> {
         isCrypto: currency.isCrypto,
         isActive: currency.isActive,
       },
+
       create: currency,
     });
   }
 
-  console.log("✓ Currencies seeded");
+  console.log(
+    "✓ Currencies seeded"
+  );
 }
 
 /*
@@ -684,7 +746,10 @@ async function seedCurrencies(): Promise<void> {
 
 async function seedNetworks(): Promise<void> {
   for (const network of networks) {
-    const currencyId = await getCurrencyId(network.currencyCode);
+    const currencyId =
+      await getCurrencyId(
+        network.currencyCode
+      );
 
     await prisma.network.upsert({
       where: {
@@ -693,34 +758,46 @@ async function seedNetworks(): Promise<void> {
           code: network.code,
         },
       },
+
       update: {
         name: network.name,
         blockchain: network.blockchain,
-        environment: network.environment,
+        environment:
+          network.environment,
         chainId: network.chainId,
-        nativeCurrency: network.nativeCurrency,
+        nativeCurrency:
+          network.nativeCurrency,
         rpcUrl: network.rpcUrl,
-        explorerUrl: network.explorerUrl,
-        isTestnet: network.isTestnet,
+        explorerUrl:
+          network.explorerUrl,
+        isTestnet:
+          network.isTestnet,
         isActive: true,
       },
+
       create: {
         currencyId,
         name: network.name,
         code: network.code,
         blockchain: network.blockchain,
-        environment: network.environment,
+        environment:
+          network.environment,
         chainId: network.chainId,
-        nativeCurrency: network.nativeCurrency,
+        nativeCurrency:
+          network.nativeCurrency,
         rpcUrl: network.rpcUrl,
-        explorerUrl: network.explorerUrl,
-        isTestnet: network.isTestnet,
+        explorerUrl:
+          network.explorerUrl,
+        isTestnet:
+          network.isTestnet,
         isActive: true,
       },
     });
   }
 
-  console.log("✓ Networks seeded");
+  console.log(
+    "✓ Networks seeded"
+  );
 }
 
 /*
@@ -735,15 +812,20 @@ async function seedSettings(): Promise<void> {
       where: {
         key: setting.key,
       },
+
       update: {
         value: setting.value,
-        description: setting.description,
+        description:
+          setting.description,
       },
+
       create: setting,
     });
   }
 
-  console.log("✓ System settings seeded");
+  console.log(
+    "✓ System settings seeded"
+  );
 }
 
 /*
@@ -754,9 +836,15 @@ async function seedSettings(): Promise<void> {
 
 async function main(): Promise<void> {
   console.log("");
-  console.log("====================================");
-  console.log(" ColdWallet Database Seed");
-  console.log("====================================");
+  console.log(
+    "===================================="
+  );
+  console.log(
+    " ColdWallet Database Seed"
+  );
+  console.log(
+    "===================================="
+  );
   console.log("");
 
   await createAdmin();
@@ -765,16 +853,24 @@ async function main(): Promise<void> {
   await seedSettings();
 
   console.log("");
-  console.log("====================================");
-  console.log(" Database seed completed.");
-  console.log("====================================");
+  console.log(
+    "===================================="
+  );
+  console.log(
+    " Database seed completed."
+  );
+  console.log(
+    "===================================="
+  );
   console.log("");
 }
 
 main()
   .catch((error) => {
     console.error("");
-    console.error("Database seed failed.");
+    console.error(
+      "Database seed failed."
+    );
     console.error(error);
     process.exitCode = 1;
   })
