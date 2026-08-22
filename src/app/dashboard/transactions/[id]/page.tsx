@@ -14,7 +14,8 @@ export default async function TransactionDetailsPage({
     id: string;
   }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session =
+    await getServerSession(authOptions);
 
   if (!session) {
     redirect("/login");
@@ -22,13 +23,17 @@ export default async function TransactionDetailsPage({
 
   const { id } = await params;
 
-  const transaction = await transactionService.getTransactionById(id);
+  const transaction =
+    await transactionService.getTransactionById(
+      id
+    );
 
   if (!transaction) {
     notFound();
   }
 
-  const markets = await marketService.getMarkets();
+  const markets =
+    await marketService.getMarkets();
 
   const market = markets.find(
     (coin) =>
@@ -44,8 +49,8 @@ export default async function TransactionDetailsPage({
     transaction.status === "COMPLETED"
       ? "bg-green-500/20 text-green-400"
       : transaction.status === "FAILED"
-      ? "bg-red-500/20 text-red-400"
-      : "bg-yellow-500/20 text-yellow-400";
+        ? "bg-red-500/20 text-red-400"
+        : "bg-yellow-500/20 text-yellow-400";
 
   return (
     <div className="space-y-8">
@@ -55,11 +60,12 @@ export default async function TransactionDetailsPage({
         </h1>
 
         <p className="mt-2 text-slate-400">
-          Complete information about this blockchain transaction.
+          Complete information about this blockchain
+          transaction.
         </p>
       </section>
 
-      <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8 space-y-8">
+      <section className="space-y-8 rounded-3xl border border-slate-800 bg-slate-900 p-8">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-400">
@@ -84,7 +90,9 @@ export default async function TransactionDetailsPage({
           </p>
 
           <h3 className="mt-2 text-4xl font-bold text-white">
-            {Number(transaction.amount).toLocaleString(
+            {Number(
+              transaction.amount
+            ).toLocaleString(
               undefined,
               {
                 maximumFractionDigits: 8,
@@ -95,10 +103,13 @@ export default async function TransactionDetailsPage({
 
           <p className="mt-3 text-xl text-cyan-400">
             $
-            {usdValue.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
+            {usdValue.toLocaleString(
+              undefined,
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }
+            )}{" "}
             USD
           </p>
         </div>
@@ -116,11 +127,19 @@ export default async function TransactionDetailsPage({
 
           <div>
             <p className="text-sm text-slate-400">
-              Network
+              Amount
             </p>
 
             <p className="mt-1 text-white">
-              {transaction.network?.name ?? "N/A"}
+              {Number(
+                transaction.amount
+              ).toLocaleString(
+                undefined,
+                {
+                  maximumFractionDigits: 8,
+                }
+              )}{" "}
+              {transaction.currency.code}
             </p>
           </div>
 
@@ -153,7 +172,7 @@ export default async function TransactionDetailsPage({
               Transaction Hash
             </p>
 
-            <div className="mt-2 rounded-xl bg-slate-950 p-4 font-mono text-sm break-all text-white">
+            <div className="mt-2 break-all rounded-xl bg-slate-950 p-4 font-mono text-sm text-white">
               {transaction.txHash}
             </div>
           </div>
@@ -165,7 +184,7 @@ export default async function TransactionDetailsPage({
               From Address
             </p>
 
-            <div className="mt-2 rounded-xl bg-slate-950 p-4 break-all text-sm text-white">
+            <div className="mt-2 break-all rounded-xl bg-slate-950 p-4 text-sm text-white">
               {transaction.fromAddress}
             </div>
           </div>
@@ -177,7 +196,7 @@ export default async function TransactionDetailsPage({
               To Address
             </p>
 
-            <div className="mt-2 rounded-xl bg-slate-950 p-4 break-all text-sm text-white">
+            <div className="mt-2 break-all rounded-xl bg-slate-950 p-4 text-sm text-white">
               {transaction.toAddress}
             </div>
           </div>

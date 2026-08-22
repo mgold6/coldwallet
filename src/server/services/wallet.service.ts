@@ -63,16 +63,29 @@ export class WalletService {
       );
     }
 
+    let selectedNetwork: {
+      id: string;
+      code: string;
+      environment: string;
+      chainId: string | null;
+    } | null = null;
+
     if (networkId) {
-      const network =
+      selectedNetwork =
         await prisma.network.findFirst({
           where: {
             id: networkId,
             currencyId,
           },
+          select: {
+            id: true,
+            code: true,
+            environment: true,
+            chainId: true,
+          },
         });
 
-      if (!network) {
+      if (!selectedNetwork) {
         throw new ValidationError(
           "Selected network does not belong to the selected currency."
         );
@@ -88,10 +101,24 @@ export class WalletService {
     let publicKey:
       string | undefined;
 
+    /*
+     * Generate a new wallet using the selected
+     * network context when one was provided.
+     */
     if (generate) {
       const generated =
         await walletGeneratorService.generate(
-          currency.code
+          currency.code,
+          selectedNetwork
+            ? {
+                networkCode:
+                  selectedNetwork.code,
+                environment:
+                  selectedNetwork.environment,
+                chainId:
+                  selectedNetwork.chainId,
+              }
+            : undefined
         );
 
       walletAddress =
@@ -196,6 +223,11 @@ export class WalletService {
           label:
             label?.trim(),
 
+          /*
+           * New wallets always begin at zero.
+           * Existing financial/accounting flows
+           * are not changed by wallet assignment.
+           */
           balance:
             0,
 
@@ -332,18 +364,9 @@ export class WalletService {
     }
 
     /*
-     * IMPORTANT:
-     *
-     * An existing wallet must NEVER be copied
+     * An existing wallet must never be copied
      * into another portfolio.
-     *
-     * The previous implementation created a
-     * second Wallet record using the exact same
-     * blockchain address. That caused the same
-     * wallet address to appear in multiple
-     * portfolios.
      */
-
     if (
       existingWallet.portfolioId !==
       portfolioId
@@ -355,12 +378,9 @@ export class WalletService {
 
     /*
      * The wallet already belongs to the selected
-     * portfolio, so there is nothing to copy.
-     *
-     * Return the existing wallet instead of
-     * creating another database record.
+     * portfolio, so return it instead of creating
+     * another database record.
      */
-
     await auditService.create({
       userId:
         adminUserId,

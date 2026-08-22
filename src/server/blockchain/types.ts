@@ -1,3 +1,9 @@
+export interface WalletGenerationOptions {
+  networkCode?: string;
+  environment?: string;
+  chainId?: string | null;
+}
+
 export interface WalletGenerationResult {
   address: string;
   publicKey?: string;
@@ -5,9 +11,17 @@ export interface WalletGenerationResult {
 }
 
 export interface BlockchainProvider {
-  generateWallet(): Promise<WalletGenerationResult>;
+  generateWallet(
+    options?: WalletGenerationOptions
+  ): Promise<WalletGenerationResult>;
 
-  validateAddress(address: string): boolean;
+  validateAddress(
+    address: string,
+    options?: WalletGenerationOptions
+  ): boolean;
 
-  getExplorerUrl(address: string): string;
+  getExplorerUrl(
+    address: string,
+    options?: WalletGenerationOptions
+  ): string;
 }

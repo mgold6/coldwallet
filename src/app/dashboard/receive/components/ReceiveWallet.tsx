@@ -6,7 +6,6 @@ import TokenSelector from "./TokenSelector";
 import WalletQRCode from "./WalletQRCode";
 import CopyAddressButton from "./CopyAddressButton";
 
-
 interface Wallet {
   id: string;
   address: string;
@@ -19,21 +18,25 @@ interface Wallet {
   } | null;
 }
 
-
+interface ReceiveWalletProps {
+  wallets: Wallet[];
+  initialWalletId?: string;
+}
 
 export default function ReceiveWallet({
   wallets,
-}: {
-  wallets: Wallet[];
-}) {
-
+  initialWalletId,
+}: ReceiveWalletProps) {
+  const initialWallet =
+    wallets.find(
+      (wallet) =>
+        wallet.id === initialWalletId
+    ) ?? wallets[0];
 
   const [selectedWallet, setSelectedWallet] =
     useState(
-      wallets[0]?.id ?? ""
+      initialWallet?.id ?? ""
     );
-
-
 
   const wallet =
     wallets.find(
@@ -41,14 +44,8 @@ export default function ReceiveWallet({
         item.id === selectedWallet
     );
 
-
-
-
-
   if (!wallet) {
-
     return (
-
       <div
         className="
           rounded-3xl
@@ -61,50 +58,23 @@ export default function ReceiveWallet({
         "
       >
         No wallet available.
-
       </div>
-
     );
-
   }
 
-
-
-
-
-
-
   return (
-
     <div className="space-y-6">
-
-
       <div>
-
         <p className="mb-2 text-sm text-slate-400">
           Select Asset
         </p>
 
-
         <TokenSelector
-
           wallets={wallets}
-
           selectedWallet={selectedWallet}
-
           onChange={setSelectedWallet}
-
         />
-
-
       </div>
-
-
-
-
-
-
-
 
       <section
         className="
@@ -115,13 +85,7 @@ export default function ReceiveWallet({
           p-6
         "
       >
-
-
-
-
         <div className="text-center">
-
-
           <h2
             className="
               text-3xl
@@ -129,21 +93,12 @@ export default function ReceiveWallet({
               text-white
             "
           >
-
             Receive {wallet.currency.code}
-
           </h2>
 
-
-
           <p className="mt-2 text-slate-400">
-
             {wallet.currency.name}
-
           </p>
-
-
-
 
           <span
             className="
@@ -158,43 +113,17 @@ export default function ReceiveWallet({
               text-cyan-400
             "
           >
-
-            {wallet.network?.name ?? "Mainnet"}
-
+            {wallet.currency.code.toUpperCase()}
           </span>
-
-
         </div>
-
-
-
-
-
-
-
 
         <div className="mt-8 flex justify-center">
-
-
           <WalletQRCode
-
             address={wallet.address}
-
           />
-
-
         </div>
 
-
-
-
-
-
-
-
         <div className="mt-8">
-
-
           <p
             className="
               text-sm
@@ -203,8 +132,6 @@ export default function ReceiveWallet({
           >
             Wallet Address
           </p>
-
-
 
           <div
             className="
@@ -220,35 +147,13 @@ export default function ReceiveWallet({
               text-white
             "
           >
-
             {wallet.address}
-
-
           </div>
-
-
-
         </div>
 
-
-
-
-
-
-
-
         <CopyAddressButton
-
           address={wallet.address}
-
         />
-
-
-
-
-
-
-
 
         <div
           className="
@@ -260,19 +165,14 @@ export default function ReceiveWallet({
             p-4
           "
         >
-
           <p
             className="
               font-semibold
               text-yellow-400
             "
           >
-
             ⚠️ Important
-
           </p>
-
-
 
           <p
             className="
@@ -281,28 +181,13 @@ export default function ReceiveWallet({
               text-slate-300
             "
           >
-
-            Only send {wallet.currency.code} to this address.
-            Sending another asset or unsupported network
-            may result in permanent loss.
-
+            Only send {wallet.currency.code} to
+            this address. Sending another asset or
+            unsupported network may result in
+            permanent loss.
           </p>
-
-
         </div>
-
-
-
-
-
-
-
-
       </section>
-
-
     </div>
-
   );
-
 }

@@ -2,13 +2,16 @@ import { Wallet, isAddress } from "ethers";
 
 import {
   BlockchainProvider,
+  WalletGenerationOptions,
   WalletGenerationResult,
 } from "../types";
 
 export class EthereumProvider
   implements BlockchainProvider
 {
-  async generateWallet(): Promise<WalletGenerationResult> {
+  async generateWallet(
+    _options?: WalletGenerationOptions
+  ): Promise<WalletGenerationResult> {
     const wallet = Wallet.createRandom();
 
     return {
@@ -18,11 +21,28 @@ export class EthereumProvider
     };
   }
 
-  validateAddress(address: string): boolean {
+  validateAddress(
+    address: string,
+    _options?: WalletGenerationOptions
+  ): boolean {
     return isAddress(address);
   }
 
-  getExplorerUrl(address: string): string {
+  getExplorerUrl(
+    address: string,
+    options?: WalletGenerationOptions
+  ): string {
+    const networkCode =
+      options?.networkCode?.toUpperCase();
+
+    if (networkCode === "ETH_SEPOLIA") {
+      return `https://sepolia.etherscan.io/address/${address}`;
+    }
+
+    if (networkCode === "ETH_HOODI") {
+      return `https://hoodi.etherscan.io/address/${address}`;
+    }
+
     return `https://etherscan.io/address/${address}`;
   }
 }

@@ -15,6 +15,7 @@ import { authOptions } from "@/lib/auth";
 import { marketService } from "@/server/services/market.service";
 import { userWalletService } from "@/server/services/user-wallet.service";
 import { transactionService } from "@/server/services/transaction.service";
+import { getWalletBlockchainBalance } from "@/server/blockchain/balance.service";
 
 import PriceChart from "@/components/dashboard/PriceChart";
 
@@ -70,22 +71,25 @@ export default async function AssetPage({
     symbol: string;
   }>;
 }) {
-  const {
-    symbol: rawSymbol,
-  } = await params;
+  const { symbol: rawSymbol } = await params;
 
-  const symbol =
-    rawSymbol.toUpperCase();
+  const symbol = rawSymbol.toUpperCase();
 
   const session =
-    await getServerSession(authOptions);
+    await getServerSession(
+      authOptions
+    );
 
   if (!session) {
     return null;
   }
 
   const userId =
-    (session.user as { id: string }).id;
+    (
+      session.user as {
+        id: string;
+      }
+    ).id;
 
   const [
     markets,
@@ -108,30 +112,62 @@ export default async function AssetPage({
     ),
   ]);
 
-  const market =
-    markets.find(
-      (coin) =>
-        coin.id === coinIds[symbol]
-    );
+  const market = markets.find(
+    (coin) =>
+      coin.id === coinIds[symbol]
+  );
 
-  const wallet =
-    wallets.find(
-      (item) =>
-        item.currency.code.toUpperCase() ===
-        symbol
-    );
+  const wallet = wallets.find(
+    (item) =>
+      item.currency.code.toUpperCase() ===
+      symbol
+  );
 
-  const balance =
-    Number(
-      wallet?.balance ??
-        wallet?.availableBalance ??
-        0
-    );
+  let balance = Number(
+    wallet?.balance ??
+      wallet?.availableBalance ??
+      0
+  );
 
-  const usdValue =
-    market
-      ? balance * market.current_price
-      : 0;
+  let balanceSource:
+    | "internal"
+    | "blockchain" = "internal";
+
+  /*
+   * ETH and canonical EVM USDT wallets use
+   * their live blockchain balances.
+   *
+   * Other assets continue using the existing
+   * platform wallet balance until their
+   * blockchain providers are implemented.
+   */
+  if (
+    (symbol === "ETH" ||
+      symbol === "USDT") &&
+    wallet?.id
+  ) {
+    try {
+      const blockchainBalance =
+        await getWalletBlockchainBalance(
+          wallet.id
+        );
+
+      balance = Number(
+        blockchainBalance.balance
+      );
+
+      balanceSource = "blockchain";
+    } catch (error) {
+      console.error(
+        `Unable to load blockchain balance for wallet ${wallet.id}:`,
+        error
+      );
+    }
+  }
+
+  const usdValue = market
+    ? balance * market.current_price
+    : 0;
 
   const assetTransactions =
     transactions.filter(
@@ -155,7 +191,6 @@ export default async function AssetPage({
         "
       >
         <ArrowLeft size={18} />
-
         Back to Dashboard
       </Link>
 
@@ -198,20 +233,20 @@ export default async function AssetPage({
                   mt-2
                   font-medium
                   ${
-                    market.price_change_percentage_24h >= 0
+                    market.price_change_percentage_24h >=
+                    0
                       ? "text-green-400"
                       : "text-red-400"
                   }
                 `}
               >
-                {market.price_change_percentage_24h >= 0
+                {market.price_change_percentage_24h >=
+                0
                   ? "+"
                   : ""}
-
                 {market.price_change_percentage_24h.toFixed(
                   2
                 )}
-
                 % (24H)
               </p>
             )}
@@ -286,6 +321,17 @@ export default async function AssetPage({
               }
             )}
           </p>
+
+          {(symbol === "ETH" ||
+            symbol === "USDT") && (
+            <p className="mt-3 text-xs text-gray-500">
+              Balance source:{" "}
+              {balanceSource ===
+              "blockchain"
+                ? "Blockchain"
+                : "Platform balance"}
+            </p>
+          )}
         </div>
 
         <div
@@ -377,12 +423,12 @@ export default async function AssetPage({
         <div className="mt-5 space-y-4">
           <div className="flex justify-between">
             <span className="text-gray-400">
-              Network
+              Asset
             </span>
 
             <span className="text-white">
-              {wallet?.network?.name ??
-                "Main Network"}
+              {market?.name ??
+                symbol}
             </span>
           </div>
 
@@ -427,7 +473,6 @@ export default async function AssetPage({
             size={18}
             className="mr-2"
           />
-
           Buy
         </Link>
 
@@ -450,7 +495,6 @@ export default async function AssetPage({
             size={18}
             className="mr-2"
           />
-
           Send
         </Link>
 
@@ -473,7 +517,6 @@ export default async function AssetPage({
             size={18}
             className="mr-2"
           />
-
           Receive
         </Link>
 
@@ -496,7 +539,6 @@ export default async function AssetPage({
             size={18}
             className="mr-2"
           />
-
           Swap
         </Link>
       </section>
@@ -519,7 +561,8 @@ export default async function AssetPage({
         <div className="mt-5 space-y-3">
           {assetTransactions.length === 0 ? (
             <p className="text-gray-400">
-              No transactions found for {symbol}.
+              No transactions found for{" "}
+              {symbol}.
             </p>
           ) : (
             assetTransactions.map(

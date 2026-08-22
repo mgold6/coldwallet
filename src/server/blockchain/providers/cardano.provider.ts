@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 
 import {
   BlockchainProvider,
+  WalletGenerationOptions,
   WalletGenerationResult,
 } from "../types";
 
@@ -22,10 +23,25 @@ async function getCardanoWasm(): Promise<CardanoWasmModule> {
   return cardanoWasmPromise;
 }
 
+function getCardanoNetworkId(
+  options?: WalletGenerationOptions
+): number {
+  const networkCode =
+    options?.networkCode?.toUpperCase();
+
+  if (networkCode === "ADA_PREPROD") {
+    return 0;
+  }
+
+  return 1;
+}
+
 export class CardanoProvider
   implements BlockchainProvider
 {
-  async generateWallet(): Promise<WalletGenerationResult> {
+  async generateWallet(
+    options?: WalletGenerationOptions
+  ): Promise<WalletGenerationResult> {
     const CardanoWasm =
       await getCardanoWasm();
 
@@ -73,10 +89,12 @@ export class CardanoProvider
             .hash()
         );
 
+    const networkId =
+      getCardanoNetworkId(options);
+
     const baseAddress =
       CardanoWasm.BaseAddress.new(
-        CardanoWasm.NetworkInfo.mainnet()
-          .network_id(),
+        networkId,
         paymentCredential,
         stakeCredential
       );
@@ -104,16 +122,9 @@ export class CardanoProvider
   }
 
   validateAddress(
-    address: string
+    address: string,
+    _options?: WalletGenerationOptions
   ): boolean {
-    /*
-     * The BlockchainProvider interface requires
-     * synchronous address validation.
-     *
-     * The Cardano WASM library is therefore loaded
-     * synchronously through require() only when
-     * validation is actually requested.
-     */
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const CardanoWasm =
@@ -131,8 +142,16 @@ export class CardanoProvider
   }
 
   getExplorerUrl(
-    address: string
+    address: string,
+    options?: WalletGenerationOptions
   ): string {
+    const networkCode =
+      options?.networkCode?.toUpperCase();
+
+    if (networkCode === "ADA_PREPROD") {
+      return `https://preprod.cardanoscan.io/address/${address}`;
+    }
+
     return `https://cardanoscan.io/address/${address}`;
   }
 }

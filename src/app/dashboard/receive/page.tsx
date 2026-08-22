@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
+
 import prisma from "@/lib/prisma";
 
 import { userWalletService } from "@/server/services/user-wallet.service";
@@ -11,6 +12,7 @@ import ReceiveWallet from "./components/ReceiveWallet";
 interface ReceivePageProps {
   searchParams: Promise<{
     portfolioId?: string;
+    asset?: string;
   }>;
 }
 
@@ -75,16 +77,29 @@ export default async function ReceivePage({
       portfolio.id
     );
 
-  const validWallets =
-    wallets
-      .filter(
-        (wallet) =>
-          wallet.address !== null
-      )
-      .map((wallet) => ({
-        ...wallet,
-        address: wallet.address!,
-      }));
+  const validWallets = wallets
+    .filter(
+      (wallet) =>
+        wallet.address !== null
+    )
+    .map((wallet) => ({
+      ...wallet,
+      address: wallet.address!,
+    }));
+
+  const requestedAsset =
+    params.asset
+      ?.trim()
+      .toUpperCase();
+
+  const initialWallet =
+    requestedAsset
+      ? validWallets.find(
+          (wallet) =>
+            wallet.currency.code.toUpperCase() ===
+            requestedAsset
+        )
+      : undefined;
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
@@ -94,12 +109,16 @@ export default async function ReceivePage({
         </h1>
 
         <p className="mt-2 text-slate-400">
-          Receive digital assets into your ColdWallet account.
+          Receive digital assets into your
+          ColdWallet account.
         </p>
       </section>
 
       <ReceiveWallet
         wallets={validWallets}
+        initialWalletId={
+          initialWallet?.id
+        }
       />
     </div>
   );

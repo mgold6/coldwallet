@@ -3,6 +3,7 @@ import {
   Prisma,
   UserRole,
   UserStatus,
+  NetworkEnvironment,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -39,6 +40,13 @@ type NetworkSeed = {
   currencyCode: string;
   name: string;
   code: string;
+  blockchain: string;
+  environment: NetworkEnvironment;
+  chainId?: string;
+  nativeCurrency?: string;
+  rpcUrl?: string;
+  explorerUrl?: string;
+  isTestnet: boolean;
 };
 
 type SettingSeed = {
@@ -143,6 +151,7 @@ const currencies: CurrencySeed[] = [
     isActive: true,
   },
 ];
+
 /*
 |--------------------------------------------------------------------------
 | Network Seed Data
@@ -150,106 +159,387 @@ const currencies: CurrencySeed[] = [
 */
 
 const networks: NetworkSeed[] = [
+  // --------------------------------------------------------------------------
   // USD
+  // --------------------------------------------------------------------------
+
   {
     currencyCode: "USD",
     name: "Internal",
     code: "INTERNAL",
+    blockchain: "Internal",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "USD",
+    isTestnet: false,
   },
 
-  // BTC
+  // --------------------------------------------------------------------------
+  // BTC — Bitcoin
+  // --------------------------------------------------------------------------
+
   {
     currencyCode: "BTC",
-    name: "Bitcoin",
-    code: "BTC",
+    name: "Bitcoin Mainnet",
+    code: "BTC_MAINNET",
+    blockchain: "Bitcoin",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "BTC",
+    isTestnet: false,
   },
 
-  // ETH
+  {
+    currencyCode: "BTC",
+    name: "Bitcoin Testnet",
+    code: "BTC_TESTNET",
+    blockchain: "Bitcoin",
+    environment: NetworkEnvironment.TESTNET,
+    nativeCurrency: "BTC",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // ETH — Ethereum
+  // --------------------------------------------------------------------------
+
   {
     currencyCode: "ETH",
-    name: "Ethereum",
-    code: "ETH",
+    name: "Ethereum Mainnet",
+    code: "ETH_MAINNET",
+    blockchain: "Ethereum",
+    environment: NetworkEnvironment.MAINNET,
+    chainId: "1",
+    nativeCurrency: "ETH",
+    isTestnet: false,
   },
+
   {
     currencyCode: "ETH",
     name: "Ethereum Sepolia",
     code: "ETH_SEPOLIA",
+    blockchain: "Ethereum",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "11155111",
+    nativeCurrency: "ETH",
+    isTestnet: true,
   },
 
-  // USDT
   {
-    currencyCode: "USDT",
-    name: "ERC20",
-    code: "ERC20",
-  },
-  {
-    currencyCode: "USDT",
-    name: "TRC20",
-    code: "TRC20",
-  },
-  {
-    currencyCode: "USDT",
-    name: "BEP20",
-    code: "BEP20",
-  },
-  {
-    currencyCode: "USDT",
-    name: "Solana",
-    code: "SOL",
-  },
-  {
-    currencyCode: "USDT",
-    name: "Avalanche",
-    code: "AVAX",
+    currencyCode: "ETH",
+    name: "Ethereum Hoodi",
+    code: "ETH_HOODI",
+    blockchain: "Ethereum",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "560048",
+    nativeCurrency: "ETH",
+    isTestnet: true,
   },
 
-  // SOL
-  {
-    currencyCode: "SOL",
-    name: "Solana",
-    code: "SOL",
-  },
+  // --------------------------------------------------------------------------
+  // BNB — BNB Smart Chain
+  // --------------------------------------------------------------------------
 
-  // XRP
-  {
-    currencyCode: "XRP",
-    name: "XRP Ledger",
-    code: "XRP",
-  },
-
-  // ADA
-  {
-    currencyCode: "ADA",
-    name: "Cardano",
-    code: "ADA",
-  },
-
-  // BNB
   {
     currencyCode: "BNB",
-    name: "BNB Smart Chain",
-    code: "BSC",
+    name: "BNB Smart Chain Mainnet",
+    code: "BSC_MAINNET",
+    blockchain: "BNB Smart Chain",
+    environment: NetworkEnvironment.MAINNET,
+    chainId: "56",
+    nativeCurrency: "BNB",
+    isTestnet: false,
   },
 
-  // AVAX
+  {
+    currencyCode: "BNB",
+    name: "BNB Smart Chain Testnet",
+    code: "BSC_TESTNET",
+    blockchain: "BNB Smart Chain",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "97",
+    nativeCurrency: "BNB",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // SOL — Solana
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "SOL",
+    name: "Solana Mainnet",
+    code: "SOL_MAINNET",
+    blockchain: "Solana",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "SOL",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "SOL",
+    name: "Solana Devnet",
+    code: "SOL_DEVNET",
+    blockchain: "Solana",
+    environment: NetworkEnvironment.DEVNET,
+    nativeCurrency: "SOL",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // XRP — XRP Ledger
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "XRP",
+    name: "XRP Ledger Mainnet",
+    code: "XRP_MAINNET",
+    blockchain: "XRP Ledger",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "XRP",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "XRP",
+    name: "XRP Ledger Testnet",
+    code: "XRP_TESTNET",
+    blockchain: "XRP Ledger",
+    environment: NetworkEnvironment.TESTNET,
+    nativeCurrency: "XRP",
+    isTestnet: true,
+  },
+
+  {
+    currencyCode: "XRP",
+    name: "XRP Ledger Devnet",
+    code: "XRP_DEVNET",
+    blockchain: "XRP Ledger",
+    environment: NetworkEnvironment.DEVNET,
+    nativeCurrency: "XRP",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // ADA — Cardano
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "ADA",
+    name: "Cardano Mainnet",
+    code: "ADA_MAINNET",
+    blockchain: "Cardano",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "ADA",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "ADA",
+    name: "Cardano Preprod",
+    code: "ADA_PREPROD",
+    blockchain: "Cardano",
+    environment: NetworkEnvironment.PREPROD,
+    nativeCurrency: "ADA",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // AVAX — Avalanche C-Chain
+  // --------------------------------------------------------------------------
+
   {
     currencyCode: "AVAX",
-    name: "Avalanche",
-    code: "AVAX",
+    name: "Avalanche C-Chain Mainnet",
+    code: "AVAX_MAINNET",
+    blockchain: "Avalanche C-Chain",
+    environment: NetworkEnvironment.MAINNET,
+    chainId: "43114",
+    nativeCurrency: "AVAX",
+    isTestnet: false,
   },
 
-  // DOGE
+  {
+    currencyCode: "AVAX",
+    name: "Avalanche Fuji Testnet",
+    code: "AVAX_FUJI",
+    blockchain: "Avalanche C-Chain",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "43113",
+    nativeCurrency: "AVAX",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // DOGE — Dogecoin
+  // --------------------------------------------------------------------------
+
   {
     currencyCode: "DOGE",
-    name: "Dogecoin",
-    code: "DOGE",
+    name: "Dogecoin Mainnet",
+    code: "DOGE_MAINNET",
+    blockchain: "Dogecoin",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "DOGE",
+    isTestnet: false,
   },
 
-  // LTC
+  {
+    currencyCode: "DOGE",
+    name: "Dogecoin Testnet",
+    code: "DOGE_TESTNET",
+    blockchain: "Dogecoin",
+    environment: NetworkEnvironment.TESTNET,
+    nativeCurrency: "DOGE",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // LTC — Litecoin
+  // --------------------------------------------------------------------------
+
   {
     currencyCode: "LTC",
-    name: "Litecoin",
-    code: "LTC",
+    name: "Litecoin Mainnet",
+    code: "LTC_MAINNET",
+    blockchain: "Litecoin",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "LTC",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "LTC",
+    name: "Litecoin Testnet",
+    code: "LTC_TESTNET",
+    blockchain: "Litecoin",
+    environment: NetworkEnvironment.TESTNET,
+    nativeCurrency: "LTC",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // USDT — Ethereum
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — Ethereum Mainnet",
+    code: "USDT_ETH_MAINNET",
+    blockchain: "Ethereum",
+    environment: NetworkEnvironment.MAINNET,
+    chainId: "1",
+    nativeCurrency: "ETH",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — Ethereum Sepolia",
+    code: "USDT_ETH_SEPOLIA",
+    blockchain: "Ethereum",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "11155111",
+    nativeCurrency: "ETH",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // USDT — BNB Smart Chain
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — BNB Smart Chain Mainnet",
+    code: "USDT_BSC_MAINNET",
+    blockchain: "BNB Smart Chain",
+    environment: NetworkEnvironment.MAINNET,
+    chainId: "56",
+    nativeCurrency: "BNB",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — BNB Smart Chain Testnet",
+    code: "USDT_BSC_TESTNET",
+    blockchain: "BNB Smart Chain",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "97",
+    nativeCurrency: "BNB",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // USDT — TRON
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — TRON Mainnet",
+    code: "USDT_TRON_MAINNET",
+    blockchain: "TRON",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "TRX",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — TRON Nile Testnet",
+    code: "USDT_TRON_NILE",
+    blockchain: "TRON",
+    environment: NetworkEnvironment.TESTNET,
+    nativeCurrency: "TRX",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // USDT — Solana
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — Solana Mainnet",
+    code: "USDT_SOL_MAINNET",
+    blockchain: "Solana",
+    environment: NetworkEnvironment.MAINNET,
+    nativeCurrency: "SOL",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — Solana Devnet",
+    code: "USDT_SOL_DEVNET",
+    blockchain: "Solana",
+    environment: NetworkEnvironment.DEVNET,
+    nativeCurrency: "SOL",
+    isTestnet: true,
+  },
+
+  // --------------------------------------------------------------------------
+  // USDT — Avalanche
+  // --------------------------------------------------------------------------
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — Avalanche C-Chain Mainnet",
+    code: "USDT_AVAX_MAINNET",
+    blockchain: "Avalanche C-Chain",
+    environment: NetworkEnvironment.MAINNET,
+    chainId: "43114",
+    nativeCurrency: "AVAX",
+    isTestnet: false,
+  },
+
+  {
+    currencyCode: "USDT",
+    name: "USDT — Avalanche Fuji Testnet",
+    code: "USDT_AVAX_FUJI",
+    blockchain: "Avalanche C-Chain",
+    environment: NetworkEnvironment.TESTNET,
+    chainId: "43113",
+    nativeCurrency: "AVAX",
+    isTestnet: true,
   },
 ];
 
@@ -326,6 +616,7 @@ async function getCurrencyId(code: string): Promise<string> {
 
   return currency.id;
 }
+
 /*
 |--------------------------------------------------------------------------
 | Seed Administrator
@@ -404,12 +695,26 @@ async function seedNetworks(): Promise<void> {
       },
       update: {
         name: network.name,
+        blockchain: network.blockchain,
+        environment: network.environment,
+        chainId: network.chainId,
+        nativeCurrency: network.nativeCurrency,
+        rpcUrl: network.rpcUrl,
+        explorerUrl: network.explorerUrl,
+        isTestnet: network.isTestnet,
         isActive: true,
       },
       create: {
         currencyId,
         name: network.name,
         code: network.code,
+        blockchain: network.blockchain,
+        environment: network.environment,
+        chainId: network.chainId,
+        nativeCurrency: network.nativeCurrency,
+        rpcUrl: network.rpcUrl,
+        explorerUrl: network.explorerUrl,
+        isTestnet: network.isTestnet,
         isActive: true,
       },
     });
@@ -440,6 +745,7 @@ async function seedSettings(): Promise<void> {
 
   console.log("✓ System settings seeded");
 }
+
 /*
 |--------------------------------------------------------------------------
 | Main
