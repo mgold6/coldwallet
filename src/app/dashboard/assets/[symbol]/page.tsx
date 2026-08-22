@@ -99,9 +99,9 @@ export default async function AssetPage({
   ] = await Promise.all([
     marketService.getMarkets(),
 
-    userWalletService.getUserWallets(
-      userId
-    ),
+    userWalletService.getSelectedPortfolioWallets(
+  userId
+),
 
     transactionService.getUserTransactions(
       userId

@@ -20,18 +20,27 @@ interface Wallet {
 
 interface ReceiveWalletProps {
   wallets: Wallet[];
-  initialWalletId?: string;
+  initialWalletId?: string | null;
 }
 
 export default function ReceiveWallet({
   wallets,
   initialWalletId,
 }: ReceiveWalletProps) {
+  /*
+   * If initialWalletId is explicitly null, the requested
+   * asset does not have a wallet in the selected portfolio.
+   *
+   * If it is undefined, this is the general Receive page,
+   * so the first available wallet may be selected.
+   */
   const initialWallet =
-    wallets.find(
-      (wallet) =>
-        wallet.id === initialWalletId
-    ) ?? wallets[0];
+    initialWalletId === null
+      ? undefined
+      : wallets.find(
+          (wallet) =>
+            wallet.id === initialWalletId
+        ) ?? wallets[0];
 
   const [selectedWallet, setSelectedWallet] =
     useState(
@@ -57,7 +66,8 @@ export default function ReceiveWallet({
           text-slate-400
         "
       >
-        No wallet available.
+        No wallet available for this asset
+        in the selected portfolio.
       </div>
     );
   }

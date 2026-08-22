@@ -117,7 +117,9 @@ export default async function ReceivePage({
       <ReceiveWallet
         wallets={validWallets}
         initialWalletId={
-          initialWallet?.id
+          requestedAsset
+            ? initialWallet?.id ?? null
+            : undefined
         }
       />
     </div>

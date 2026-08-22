@@ -32,6 +32,20 @@ type RpcNetwork = {
   unit: string;
 };
 
+type BitcoinAddressStats = {
+  tx_count: number;
+  funded_txo_count: number;
+  funded_txo_sum: number;
+  spent_txo_count: number;
+  spent_txo_sum: number;
+};
+
+type BitcoinAddressResponse = {
+  address: string;
+  chain_stats: BitcoinAddressStats;
+  mempool_stats: BitcoinAddressStats;
+};
+
 const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
 ];
@@ -147,6 +161,33 @@ function getXrpWebSocketUrl(
   }
 }
 
+function getBitcoinApiBaseUrl(
+  networkCode: string
+): string {
+  switch (networkCode) {
+    case "BTC_MAINNET":
+      return (
+        env(
+          "BITCOIN_MAINNET_API_URL"
+        ) ??
+        "https://mempool.space/api"
+      );
+
+    case "BTC_TESTNET":
+      return (
+        env(
+          "BITCOIN_TESTNET_API_URL"
+        ) ??
+        "https://mempool.space/testnet/api"
+      );
+
+    default:
+      throw new Error(
+        `No Bitcoin API configuration is available for network ${networkCode}.`
+      );
+  }
+}
+
 function getRpcNetwork(
   networkCode: string,
   networkName: string,
@@ -203,6 +244,15 @@ function getRpcNetwork(
   }
 }
 
+function isBitcoinNetwork(
+  networkCode: string
+): boolean {
+  return (
+    networkCode === "BTC_MAINNET" ||
+    networkCode === "BTC_TESTNET"
+  );
+}
+
 function isEvmUsdtNetwork(
   networkCode: string
 ): boolean {
@@ -214,6 +264,94 @@ function isEvmUsdtNetwork(
     "USDT_AVAX_MAINNET",
     "USDT_AVAX_FUJI",
   ]).has(networkCode);
+}
+
+async function getBitcoinBalance(
+  address: string,
+  networkCode: string
+): Promise<string> {
+  const baseUrl =
+    getBitcoinApiBaseUrl(
+      networkCode
+    );
+
+  const url =
+    `${baseUrl}/address/${encodeURIComponent(
+      address
+    )}`;
+
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(
+      () => controller.abort(),
+      15_000
+    );
+
+  try {
+    const response =
+      await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept:
+            "application/json",
+        },
+        cache: "no-store",
+        signal: controller.signal,
+      });
+
+    if (!response.ok) {
+      throw new Error(
+        `Bitcoin API returned HTTP ${response.status}.`
+      );
+    }
+
+    const data =
+      (await response.json()) as BitcoinAddressResponse;
+
+    if (
+      !data ||
+      !data.chain_stats ||
+      !data.mempool_stats
+    ) {
+      throw new Error(
+        "Bitcoin API returned an invalid address response."
+      );
+    }
+
+    const confirmedBalance =
+      data.chain_stats.funded_txo_sum -
+      data.chain_stats.spent_txo_sum;
+
+    const mempoolBalance =
+      data.mempool_stats.funded_txo_sum -
+      data.mempool_stats.spent_txo_sum;
+
+    const satoshis =
+      confirmedBalance +
+      mempoolBalance;
+
+    return formatUnits(
+      BigInt(satoshis),
+      8
+    );
+  } catch (error) {
+    if (
+      error instanceof
+        DOMException &&
+      error.name ===
+        "AbortError"
+    ) {
+      throw new Error(
+        "Bitcoin balance lookup timed out."
+      );
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function getEvmNativeBalance(
@@ -353,7 +491,8 @@ async function getXrpBalance(
       });
 
     const drops =
-      response.result.account_data.Balance;
+      response.result
+        .account_data.Balance;
 
     return String(
       dropsToXrp(drops)
@@ -375,9 +514,29 @@ async function getNetworkBalance(
   unit: string;
 }> {
   if (
-    networkCode === "XRP_MAINNET" ||
-    networkCode === "XRP_TESTNET" ||
-    networkCode === "XRP_DEVNET"
+    isBitcoinNetwork(
+      networkCode
+    )
+  ) {
+    const balance =
+      await getBitcoinBalance(
+        address,
+        networkCode
+      );
+
+    return {
+      balance,
+      unit: "BTC",
+    };
+  }
+
+  if (
+    networkCode ===
+      "XRP_MAINNET" ||
+    networkCode ===
+      "XRP_TESTNET" ||
+    networkCode ===
+      "XRP_DEVNET"
   ) {
     const balance =
       await getXrpBalance(
@@ -468,8 +627,9 @@ export async function getWalletBlockchainBalance(
    * Legacy network records exist in the database.
    *
    * They are intentionally not guessed or silently
-   * remapped. Existing wallets keep their current
-   * accounting behavior.
+   * remapped. Existing wallets should be assigned to
+   * canonical network records before requesting a
+   * blockchain balance.
    */
   if (
     networkCode === "ETH" ||
@@ -496,7 +656,9 @@ export async function getWalletBlockchainBalance(
    */
   if (
     currencyCode === "USDT" &&
-    !isEvmUsdtNetwork(networkCode) &&
+    !isEvmUsdtNetwork(
+      networkCode
+    ) &&
     (
       networkCode.startsWith(
         "USDT_SOL_"
