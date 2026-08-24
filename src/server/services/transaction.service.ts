@@ -404,7 +404,6 @@ export class TransactionService {
         }
 
         const manualFundsEnabled =
-          globalManualFundsEnabled &&
           userControls.manualFundsWithdrawable;
 
         if (wallet.withdrawalLocked) {

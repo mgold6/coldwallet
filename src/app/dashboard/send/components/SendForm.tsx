@@ -55,11 +55,12 @@ export default function SendForm({
       selectedWallet?.currency.code.toLowerCase()
   );
 
-  const numericAmount = Number(amount || 0);
+  const numericUsdAmount = Number(amount || 0);
 
-  const usdValue = market
-    ? numericAmount * market.current_price
-    : 0;
+  const estimatedCryptoAmount =
+    market && market.current_price > 0
+      ? numericUsdAmount / market.current_price
+      : 0;
 
   function clearMessage() {
     setMessage("");
@@ -86,10 +87,17 @@ export default function SendForm({
       return;
     }
 
+    const availableCrypto = Number(
+      selectedWallet.availableBalance
+    );
+    const cryptoPrice = market?.current_price ?? 0;
+
+    if (cryptoPrice <= 0) {
+      return;
+    }
+
     setAmount(
-      Number(
-        selectedWallet.availableBalance
-      ).toString()
+      (availableCrypto * cryptoPrice).toFixed(2)
     );
 
     clearMessage();
@@ -131,20 +139,45 @@ export default function SendForm({
       return;
     }
 
-    const availableBalance = Number(
-      selectedWallet.availableBalance
-    );
+   const availableBalance = Number(
+  selectedWallet.availableBalance
+);
 
-    if (
-      !Number.isFinite(availableBalance) ||
-      Number(trimmedAmount) > availableBalance
-    ) {
-      setMessage(
-        "The requested amount exceeds your available balance."
-      );
-      setMessageType("error");
-      return;
-    }
+const cryptoPrice = market?.current_price ?? 0;
+
+if (
+  !Number.isFinite(availableBalance) ||
+  !Number.isFinite(cryptoPrice) ||
+  cryptoPrice <= 0
+) {
+  setMessage(
+    "Unable to determine the current cryptocurrency price."
+  );
+  setMessageType("error");
+  return;
+}
+
+const requestedCryptoAmount =
+  Number(trimmedAmount) / cryptoPrice;
+
+if (
+  !Number.isFinite(requestedCryptoAmount) ||
+  requestedCryptoAmount <= 0
+) {
+  setMessage(
+    "Unable to calculate the cryptocurrency amount."
+  );
+  setMessageType("error");
+  return;
+}
+
+if (requestedCryptoAmount > availableBalance) {
+  setMessage(
+    "The requested amount exceeds your available balance."
+  );
+  setMessageType("error");
+  return;
+}
 
     if (!trimmedAddress) {
       setMessage(
@@ -297,7 +330,7 @@ export default function SendForm({
           htmlFor="amount"
           className="text-sm text-slate-400"
         >
-          Amount
+          USD Amount
         </label>
 
         <div className="flex gap-3">
@@ -343,7 +376,7 @@ export default function SendForm({
         </div>
       </div>
 
-      {/* Estimated Value */}
+      {/* Estimated Crypto Amount */}
 
       <div
         className="
@@ -353,15 +386,14 @@ export default function SendForm({
         "
       >
         <p className="text-sm text-slate-400">
-          Estimated Value
+          Estimated {selectedWallet?.currency.code ?? "Crypto"} Amount
         </p>
 
         <p className="mt-2 text-2xl font-bold text-white">
-          $
-          {usdValue.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
+          {estimatedCryptoAmount.toLocaleString(undefined, {
+            maximumFractionDigits: 8,
+          })}{" "}
+          {selectedWallet?.currency.code ?? ""}
         </p>
       </div>
 
