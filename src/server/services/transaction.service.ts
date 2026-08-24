@@ -428,16 +428,8 @@ export class TransactionService {
             wallet.internalBalance ?? 0
           );
 
-        const blockchainFunds =
-          new Prisma.Decimal(
-            wallet.blockchainBalance ?? 0
-          );
-
         let internalPortion =
           new Prisma.Decimal(0);
-
-        let blockchainPortion =
-          cryptoAmount;
 
         if (manualFundsEnabled) {
           internalPortion =
@@ -445,33 +437,6 @@ export class TransactionService {
               internalFunds,
               cryptoAmount
             );
-
-          blockchainPortion =
-            cryptoAmount.minus(
-              internalPortion
-            );
-        }
-
-        if (
-          !manualFundsEnabled &&
-          cryptoAmount.greaterThan(
-            blockchainFunds
-          )
-        ) {
-          throw new Error(
-            userControls.manualFundsRestrictionMessage?.trim() ||
-              manualFundsMessage
-          );
-        }
-
-        if (
-          blockchainPortion.greaterThan(
-            blockchainFunds
-          )
-        ) {
-          throw new Error(
-            insufficientBalanceMessage
-          );
         }
 
         /*
