@@ -385,8 +385,13 @@ export class WithdrawalService {
         }
 
         /*
-         * Determine how much of this withdrawal
-         * is backed by internal/manual funds versus
+         * Use internal funds first.
+         *
+         * The wallet's available balance is the amount authorized
+         * for withdrawal. Internal funds can satisfy the withdrawal
+         * even when the blockchain balance is zero.
+         *
+         * Only any amount not covered by internal funds requires
          * blockchain-backed funds.
          */
         const internalBalance =
@@ -395,12 +400,10 @@ export class WithdrawalService {
           );
 
         const internalUsed =
-      withdrawal.manualFunds
-        ? Prisma.Decimal.min(
+          Prisma.Decimal.min(
             internalBalance,
             amount
-          )
-        : new Prisma.Decimal(0);
+          );
 
         const blockchainUsed =
           amount.minus(
