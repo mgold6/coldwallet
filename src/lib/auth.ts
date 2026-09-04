@@ -121,9 +121,85 @@ export const authOptions: NextAuthOptions = {
           label: "2FA Code",
           type: "text",
         },
+        verificationToken: {
+          label: "Verification Token",
+          type: "text",
+        },
       },
 
       async authorize(credentials, req) {
+        const verificationToken = String(
+          credentials?.verificationToken || ""
+        ).trim();
+
+        if (verificationToken) {
+          const verification = await prisma.verificationCode.findFirst({
+            where: {
+              code: verificationToken,
+              used: false,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          });
+
+          if (!verification) {
+            return null;
+          }
+
+          if (verification.expiresAt.getTime() < Date.now()) {
+            await prisma.verificationCode.update({
+              where: { id: verification.id },
+              data: { used: true },
+            });
+            return null;
+          }
+
+          if (!verification.userId) {
+            return null;
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { id: verification.userId },
+          });
+
+          if (!user || !user.emailVerified) {
+            return null;
+          }
+
+          await prisma.verificationCode.update({
+            where: { id: verification.id },
+            data: { used: true },
+          });
+
+          const ipAddress = getClientIp(req.headers);
+          const userAgent = getUserAgent(req.headers);
+
+          try {
+            await prisma.loginHistory.create({
+              data: {
+                userId: user.id,
+                ipAddress,
+                userAgent,
+                success: true,
+              },
+            });
+          } catch (error) {
+            console.error(
+              "LOGIN HISTORY RECORDING ERROR:",
+              error
+            );
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+            role: user.role,
+            isTwoFactorEnabled: user.isTwoFactorEnabled,
+          };
+        }
+
         if (
           !credentials?.email ||
           !credentials?.password
